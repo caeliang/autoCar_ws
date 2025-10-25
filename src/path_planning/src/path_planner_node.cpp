@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include "path_planning/visualize.hpp"
+#include "path_planning/global.hpp"
 
 // ROS 2 Entegrasyonu için A* Mantığını bir Sınıfa Alın
 class PathPlannerNode : public rclcpp::Node
@@ -12,30 +14,37 @@ public:
     PathPlannerNode() : Node("path_planner_node")
     {
         RCLCPP_INFO(this->get_logger(), "Path Planner Node has started and will now calculate a path.");
-        
-        // A* algoritmasını çalıştıran metodu çağır
-        calculate_and_print_path();
+
+        std::vector<AStar::Vec2i> path = calculate_and_print_path();
+        // Görselleştirme: global map'i kullan
+        visualizeMapAndPath(g_map, path);
     }
 
 private:
-    // A* Hesaplama ve Konsola Yazdırma Metodu
-    void calculate_and_print_path()
+    std::vector<AStar::Vec2i> calculate_and_print_path()
     {
+        // Use global map
+        int rows = g_map.size();
+        int cols = g_map[0].size();
+        
         AStar::Generator generator;
-
-        // 25x25 grid boyutu
-        generator.setWorldSize({25, 25});
-        generator.setHeuristic(AStar::Heuristic::euclidean);
-        generator.setDiagonalMovement(false);
-
-        // 🔹 Engelleri ekle (örnek)
-        for (int i = 5; i <= 15; ++i) {
-            generator.addCollision({i, 10}); // (x,y)
+        for (int y = 0; y < rows; ++y)
+        {
+            for (int x = 0; x < cols; ++x)
+            {
+                if (g_map[x][y] == 1)
+                    generator.addCollision({x, y});
+            }
         }
+        generator.setWorldSize({cols, rows});
+        generator.setDiagonalMovement(false);
+        generator.setHeuristic(&AStar::Heuristic::manhattan);
 
-        // 🔹 Başlangıç ve hedef
+
+
+
         AStar::Vec2i start = {0, 0};
-        AStar::Vec2i end   = {20, 20};
+        AStar::Vec2i end   = {4, 4};
 
         RCLCPP_INFO(this->get_logger(), "Generating path from [%d, %d] to [%d, %d]...", 
                     start.x, start.y, end.x, end.y);
@@ -45,7 +54,7 @@ private:
 
         if (path.empty()) {
             RCLCPP_WARN(this->get_logger(), "No path found!");
-            return;
+            return {};
         }
 
         std::string path_str = "Path found: [";
@@ -55,11 +64,10 @@ private:
         }
         path_str += "]";
         RCLCPP_INFO(this->get_logger(), "%s", path_str.c_str());
-
+        return path;
     }
 
 };
-// Ana Program Giriş Noktası (ROS 2 Standardı)
 int main(int argc, char **argv)
 {
     // ROS 2 Sistemini Başlat

@@ -9,6 +9,18 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED) 
 
+
+include_directories(include)
+
+find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
+include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS})
+
+add_executable(path_planner_node src/path_planner_node.cpp src/AStar.cpp src/global.cpp src/visualize.cpp)
+ament_target_dependencies(path_planner_node rclcpp)
+target_link_libraries(path_planner_node ${Python3_LIBRARIES})
+install(TARGETS path_planner_node DESTINATION lib/${PROJECT_NAME})
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -20,10 +32,5 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-include_directories(include)
-
-add_executable(path_planner_node src/path_planner_node.cpp src/AStar.cpp)
-ament_target_dependencies(path_planner_node rclcpp)
-install(TARGETS path_planner_node DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
