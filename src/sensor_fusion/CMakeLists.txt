@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(sensor_fusion_pkg)
+project(sensor_fusion)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -46,11 +46,17 @@ install(TARGETS
 install(DIRECTORY include/
   DESTINATION include/
 )
+
 install(
-  PROGRAMS scripts/log_and_plot.py
+  PROGRAMS scripts/plot_csv_static.py scripts/bag_to_plot.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(DIRECTORY
+  launch
+  config
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

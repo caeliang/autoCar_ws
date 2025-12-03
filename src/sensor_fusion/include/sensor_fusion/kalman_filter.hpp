@@ -25,4 +25,9 @@ private:
     Eigen::MatrixXd P_;   // Durum belirsizlik matrisi
 
     Eigen::MatrixXd I_;   // Birim matris (işlem kolaylığı için)
+    // Temporaries to avoid reallocations during predict/update
+    Eigen::VectorXd y_;
+    Eigen::MatrixXd S_;
+    Eigen::MatrixXd K_;
+    Eigen::MatrixXd HP_; // helper: H * P
 };
