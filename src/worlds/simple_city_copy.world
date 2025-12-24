@@ -7678,6 +7678,75 @@
       <uri>model://stop_sign</uri>
     </include>
 
+    <!-- PLACEHOLDER PROHIBITION SIGNS (using stop_sign model as a visual placeholder)
+         Replace these with dedicated sign models (no_entry/no_left_turn/no_right_turn)
+         when available. Positions are chosen near intersections; adjust poses as needed. -->
+
+    <include>
+      <name>no_left_turn_1</name>
+      <pose>
+      -41.3
+      -6.5
+      5.01
+      0
+      0
+      -1.57
+      </pose>
+      <uri>model://stop_sign</uri>
+    </include>
+
+    <include>
+      <name>no_right_turn_1</name>
+      <pose>
+      -11.3
+      6.5
+      5.01
+      0
+      0
+      1.57
+      </pose>
+      <uri>model://stop_sign</uri>
+    </include>
+
+    <include>
+      <name>no_entry_1</name>
+      <pose>
+      48.7
+      -2.0
+      5.01
+      0
+      0
+      3.14
+      </pose>
+      <uri>model://stop_sign</uri>
+    </include>
+
+    <include>
+      <name>no_left_turn_2</name>
+      <pose>
+      41.3
+      3.0
+      5.01
+      0
+      0
+      0.0
+      </pose>
+      <uri>model://stop_sign</uri>
+    </include>
+
+    <include>
+      <name>no_right_turn_2</name>
+      <pose>
+      123.7
+      0.5
+      5.01
+      0
+      0
+      3.14
+      </pose>
+      <uri>model://stop_sign</uri>
+    </include>
+
 
     <!-- Street lights -->
 
@@ -9822,6 +9891,21 @@
         <frwheel_steering_i_gain>0</frwheel_steering_i_gain>
         <flwheel_steering_d_gain>3e2</flwheel_steering_d_gain>
         <frwheel_steering_d_gain>3e2</frwheel_steering_d_gain>
+      </plugin>
+
+      <!-- ROS2 Planar Move Plugin - basit ve stabil kontrol -->
+      <plugin name="planar_move" filename="libgazebo_ros_planar_move.so">
+        <ros>
+          <namespace>/prius</namespace>
+          <remapping>cmd_vel:=cmd_vel</remapping>
+          <remapping>odom:=odom</remapping>
+        </ros>
+        <update_rate>100</update_rate>
+        <publish_rate>50</publish_rate>
+        <publish_odom>true</publish_odom>
+        <publish_odom_tf>false</publish_odom_tf>
+        <odometry_frame>odom</odometry_frame>
+        <robot_base_frame>chassis</robot_base_frame>
       </plugin>
 
     </include>

@@ -1,19 +1,7 @@
 #!/usr/bin/env python3
 """
-Keyboard teleop for Prius in Gazebo (ROS 2)
-Publishes to: /prius_hybrid_123/cmd_vel
-
-Controls:
-  w/s : forward/backward
-  a/d : rotate left/right
-  q   : increase linear speed
-  e   : decrease linear speed
-  z   : increase angular speed
-  x   : decrease angular speed
-  space : stop
-  Ctrl-C: quit
-
-This is a lightweight local teleop script (no external deps beyond ROS2 and Python stdlib).
+Prius Araba Kontrolu (ROS 2 + Gazebo Planar Move)
+Topic: /prius/cmd_vel
 """
 
 import rclpy
@@ -25,7 +13,7 @@ import tty
 import select
 
 
-def get_key(timeout=0.1):
+def get_key(timeout=0.05):
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -40,83 +28,101 @@ def get_key(timeout=0.1):
     return key
 
 
-class KeyboardTeleop(Node):
+class CarController(Node):
     def __init__(self):
-        super().__init__('prius_keyboard_teleop')
-        self.pub = self.create_publisher(Twist, '/prius_hybrid_123/cmd_vel', 10)
-        self.linear_speed = 1.5  # m/s initial
-        self.angular_speed = 1.0  # rad/s initial
-        self.get_logger().info('Keyboard teleop node started. Focus this terminal and use keys to control the Prius.')
+        super().__init__('prius_controller')
+        self.pub = self.create_publisher(Twist, '/prius/cmd_vel', 10)
+        
+        self.max_linear = 2.0
+        self.max_angular = 1.0
+        
+        self.linear = 0.0
+        self.angular = 0.0
+        self.target_linear = 0.0
+        self.target_angular = 0.0
+        
+        self.dt = 0.02
+        self.timer = self.create_timer(self.dt, self.update)
 
-    def publish_twist(self, lin, ang):
+    def update(self):
+        # Smooth interpolation
+        diff = self.target_linear - self.linear
+        if abs(diff) > 0.01:
+            self.linear += 0.05 if diff > 0 else -0.08
+            if diff > 0:
+                self.linear = min(self.linear, self.target_linear)
+            else:
+                self.linear = max(self.linear, self.target_linear)
+        
+        diff = self.target_angular - self.angular
+        if abs(diff) > 0.01:
+            self.angular += 0.1 if diff > 0 else -0.1
+            if diff > 0:
+                self.angular = min(self.angular, self.target_angular)
+            else:
+                self.angular = max(self.angular, self.target_angular)
+        
         msg = Twist()
-        msg.linear.x = lin
-        msg.angular.z = ang
+        # W/S icin linear.y (ters isaret cunku araba yonu)
+        msg.linear.y = -self.linear
+        # A/D icin angular.z (normal)
+        msg.angular.z = self.angular
         self.pub.publish(msg)
-
-
-def print_instructions(linear, angular):
-    print('\nKeyboard teleop controls:')
-    print('  w/s : forward/backward')
-    print('  a/d : rotate left/right')
-    print('  q/e : increase/decrease linear speed')
-    print('  z/x : increase/decrease angular speed')
-    print('  space : stop')
-    print('  Ctrl-C : quit')
-    print(f'Current speeds -> linear: {linear:.2f} m/s, angular: {angular:.2f} rad/s')
 
 
 def main():
     rclpy.init()
-    node = KeyboardTeleop()
+    node = CarController()
+
+    print('\n' + '='*50)
+    print('       PRIUS ARABA KONTROLU')
+    print('='*50)
+    print('  W = Ileri')
+    print('  S = Geri')
+    print('  A = Sola don')
+    print('  D = Saga don')
+    print('  X = Ani fren')
+    print('  Q/E = Hiz ayarla')
+    print('='*50)
 
     try:
-        print_instructions(node.linear_speed, node.angular_speed)
         while rclpy.ok():
-            key = get_key(0.1)
-
+            rclpy.spin_once(node, timeout_sec=0)
+            key = get_key(0.05)
+            
             if key == 'w':
-                node.publish_twist(node.linear_speed, 0.0)
-                node.get_logger().debug('forward')
+                node.target_linear = node.max_linear
             elif key == 's':
-                node.publish_twist(-node.linear_speed, 0.0)
-                node.get_logger().debug('back')
+                node.target_linear = -node.max_linear * 0.5
             elif key == 'a':
-                node.publish_twist(0.0, node.angular_speed)
-                node.get_logger().debug('turn left')
+                node.target_angular = node.max_angular
             elif key == 'd':
-                node.publish_twist(0.0, -node.angular_speed)
-                node.get_logger().debug('turn right')
-            elif key == 'q':
-                node.linear_speed *= 1.1
-                print(f'Linear speed: {node.linear_speed:.2f} m/s')
-            elif key == 'e':
-                node.linear_speed *= 0.9
-                print(f'Linear speed: {node.linear_speed:.2f} m/s')
-            elif key == 'z':
-                node.angular_speed *= 1.1
-                print(f'Angular speed: {node.angular_speed:.2f} rad/s')
+                node.target_angular = -node.max_angular
             elif key == 'x':
-                node.angular_speed *= 0.9
-                print(f'Angular speed: {node.angular_speed:.2f} rad/s')
-            elif key == ' ':
-                node.publish_twist(0.0, 0.0)
-                node.get_logger().info('STOP')
-            elif key == '\x03':  # Ctrl-C
+                node.linear = 0.0
+                node.angular = 0.0
+                node.target_linear = 0.0
+                node.target_angular = 0.0
+            elif key == 'q':
+                node.max_linear = min(node.max_linear + 0.5, 5.0)
+                print(f'\rHiz: {node.max_linear} m/s')
+            elif key == 'e':
+                node.max_linear = max(node.max_linear - 0.5, 0.5)
+                print(f'\rHiz: {node.max_linear} m/s')
+            elif key == '\x03':
                 raise KeyboardInterrupt
-            else:
-                # when no key or unrecognized key, publish zero to avoid drifting
-                if key == '':
-                    # don't spam zero if nothing changed; small idle sleep handles it
-                    pass
-                else:
-                    node.get_logger().debug(f'Unknown key: {repr(key)}')
+            elif key == '':
+                node.target_linear = 0.0
+                node.target_angular = 0.0
+            
+            speed = abs(node.linear) * 3.6
+            print(f'\rHiz: {speed:4.1f} km/h | Donus: {node.angular:+.2f}  ', end='', flush=True)
 
     except KeyboardInterrupt:
-        print('\nExiting keyboard teleop')
+        print('\n\nCikis...')
     finally:
-        # ensure we publish zero velocity on exit
-        node.publish_twist(0.0, 0.0)
+        msg = Twist()
+        node.pub.publish(msg)
         node.destroy_node()
         rclpy.shutdown()
 
