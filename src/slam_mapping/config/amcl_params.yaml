@@ -1,0 +1,59 @@
+# AMCL Localization Parameters for AutoCar
+# Used with saved map for localization (no mapping)
+
+amcl:
+  ros__parameters:
+    use_sim_time: true
+    
+    # Robot model
+    robot_model_type: "nav2_amcl::DifferentialMotionModel"
+    
+    # Filter parameters
+    alpha1: 0.2   # Rotation noise from rotation
+    alpha2: 0.2   # Rotation noise from translation
+    alpha3: 0.2   # Translation noise from translation
+    alpha4: 0.2   # Translation noise from rotation
+    alpha5: 0.1   # Translation noise from translation (strafe)
+    
+    # Particle filter
+    min_particles: 500
+    max_particles: 2000
+    
+    # KLD sampling parameters
+    kld_err: 0.05
+    kld_z: 0.99
+    
+    # Laser model parameters
+    laser_model_type: "likelihood_field"
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 20.0
+    laser_min_range: 0.2
+    
+    # Map/odom frames
+    base_frame_id: "base_link"
+    global_frame_id: "map"
+    odom_frame_id: "odom"
+    
+    # Scan topic
+    scan_topic: "/prius/scan"
+    
+    # Update thresholds
+    update_min_a: 0.2    # Rotation threshold (radians)
+    update_min_d: 0.25   # Translation threshold (meters)
+    
+    # Pose publishing
+    tf_broadcast: true
+    transform_tolerance: 1.0
+    
+    # Initial pose (can be overridden)
+    set_initial_pose: false
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+
+map_server:
+  ros__parameters:
+    use_sim_time: true
+    yaml_filename: ""  # Will be set by launch file
