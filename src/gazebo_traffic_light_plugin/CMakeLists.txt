@@ -8,6 +8,7 @@ endif()
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(gazebo REQUIRED)
+find_package(ignition-math6 REQUIRED)
 
 # Include directories
 include_directories(${GAZEBO_INCLUDE_DIRS})
@@ -21,6 +22,7 @@ add_library(auto_traffic_light_plugin SHARED
 
 target_link_libraries(auto_traffic_light_plugin
   ${GAZEBO_LIBRARIES}
+  ignition-math6::ignition-math6
 )
 
 # Install targets
