@@ -1,0 +1,216 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="prius_compact">
+    <!-- Include base prius model -->
+    <include>
+      <uri>model://prius_hybrid</uri>
+    </include>
+
+    <!-- Sensor mount joint -->
+    <joint name="sensor_joint" type="fixed">
+      <parent>prius_hybrid::chassis</parent>
+      <child>sensor_link</child>
+    </joint>
+
+    <!-- Sensor Link -->
+    <link name="sensor_link">
+      <pose>0 0 1.5 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.001</ixx>
+          <iyy>0.001</iyy>
+          <izz>0.001</izz>
+        </inertia>
+      </inertial>
+
+      <!-- ============================================ -->
+      <!-- CENTER LIDAR - 3D scan z ∈ [0.5m, 1.5m]     -->
+      <!-- Lidar at z=1.0m, vertical FOV covers ±0.5m  -->
+      <!-- ============================================ -->
+      <sensor name="center_lidar" type="ray">
+        <pose>0 0 1.0 0 0 0</pose>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.0873</min_angle>
+              <max_angle>0.0873</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.2</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </ray>
+        <always_on>true</always_on>
+        <update_rate>20</update_rate>
+        <visualize>true</visualize>
+        <plugin name="lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+          <ros>
+            <namespace>/prius</namespace>
+            <remapping>~/out:=scan</remapping>
+          </ros>
+          <output_type>sensor_msgs/PointCloud2</output_type>
+          <frame_name>lidar_link</frame_name>
+        </plugin>
+      </sensor>
+
+      <!-- ============================================ -->
+      <!-- FRONT CAMERA                                -->
+      <!-- ============================================ -->
+      <sensor name="front_camera" type="camera">
+        <pose>0 -1.5 0 0 0 -1.5708</pose>
+        <camera name="front_camera">
+          <horizontal_fov>1.39626</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.005</stddev>
+          </noise>
+        </camera>
+        <always_on>true</always_on>
+        <update_rate>30</update_rate>
+        <visualize>false</visualize>
+        <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+          <ros>
+            <namespace>/prius</namespace>
+            <remapping>~/image_raw:=camera/image_raw</remapping>
+            <remapping>~/camera_info:=camera/camera_info</remapping>
+          </ros>
+          <camera_name>front_camera</camera_name>
+          <frame_name>camera_link</frame_name>
+        </plugin>
+      </sensor>
+
+      <!-- ============================================ -->
+      <!-- GPS SENSOR                                  -->
+      <!-- ============================================ -->
+      <sensor name="gps_sensor" type="gps">
+        <pose>0 0 0 0 0 0</pose>
+        <update_rate>10.0</update_rate>
+        <always_on>true</always_on>
+        <gps>
+          <position_sensing>
+            <horizontal>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.5</stddev>
+              </noise>
+            </horizontal>
+            <vertical>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>1.0</stddev>
+              </noise>
+            </vertical>
+          </position_sensing>
+          <velocity_sensing>
+            <horizontal>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.1</stddev>
+              </noise>
+            </horizontal>
+            <vertical>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.1</stddev>
+              </noise>
+            </vertical>
+          </velocity_sensing>
+        </gps>
+        <plugin name="gps_plugin" filename="libgazebo_ros_gps_sensor.so">
+          <ros>
+            <namespace>/prius</namespace>
+            <remapping>~/out:=gps/fix</remapping>
+          </ros>
+          <frame_name>gps_link</frame_name>
+        </plugin>
+      </sensor>
+
+      <!-- ============================================ -->
+      <!-- IMU SENSOR                                  -->
+      <!-- ============================================ -->
+      <sensor name="imu_sensor" type="imu">
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>true</always_on>
+        <update_rate>100.0</update_rate>
+        <imu>
+          <angular_velocity>
+            <x>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.001</stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.001</stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.001</stddev>
+              </noise>
+            </z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </z>
+          </linear_acceleration>
+        </imu>
+        <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+          <ros>
+            <namespace>/prius</namespace>
+            <remapping>~/out:=imu</remapping>
+          </ros>
+          <initial_orientation_as_reference>false</initial_orientation_as_reference>
+          <frame_name>imu_link</frame_name>
+        </plugin>
+      </sensor>
+
+    </link>
+
+  </model>
+</sdf>
