@@ -1,0 +1,63 @@
+octomap_server_node:
+  ros__parameters:
+    # Topic Configuration
+    cloud_in: "/prius/scan"  # 3D PointCloud2 input
+    
+    # Frame Configuration
+    frame_id: "odom"
+    base_frame_id: "chassis"
+    
+    # Octomap Resolution (meters per voxel)
+    # Lower = more detail, higher memory usage
+    # 0.05 = 5cm resolution (good for indoor/urban)
+    # 0.1 = 10cm resolution (faster, less memory)
+    resolution: 0.1
+    
+    # Height filtering (meters)
+    # Only points within these heights are considered
+    height_min: -0.5
+    height_max: 3.0
+    
+    # Occupancy thresholds
+    occupancy_min_z: -0.5  # Minimum Z for occupancy grid
+    occupancy_max_z: 2.0   # Maximum Z for occupancy grid
+    
+    # Point cloud filtering
+    pointcloud_min_z: -0.5  # Filter points below this
+    pointcloud_max_z: 10.0  # Filter points above this
+    
+    # Sensor model parameters
+    sensor_model:
+      max_range: 30.0      # Maximum sensor range (meters)
+      hit: 0.7             # Probability for occupied cell
+      miss: 0.4            # Probability for free cell
+      min: 0.12            # Minimum occupancy probability
+      max: 0.97            # Maximum occupancy probability
+    
+    # Update settings
+    filter_ground: false    # Set to true to filter ground plane
+    ground_filter_distance: 0.04  # Distance threshold for ground
+    ground_filter_angle: 0.15     # Angle threshold for ground
+    ground_filter_plane_distance: 0.07
+    
+    # Compression
+    compress_map: true     # Compress map for efficiency
+    
+    # Incremental 2D projection
+    incremental_2D_projection: true
+    
+    # Latch topics (keep last message)
+    latch: true
+    
+    # Map update settings
+    publish_free_space: true  # Çemberler görünür (localization'a etki etmez)
+    
+    # Transfer settings
+    filter_speckles: true     # Remove noise
+    
+    # Use BBX (Bounding Box) limits
+    use_height_map: true
+    use_colored_map: false  # Set to true if you have RGB pointcloud
+    
+    # Use simulation time
+    use_sim_time: true
