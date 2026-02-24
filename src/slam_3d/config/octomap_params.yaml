@@ -28,11 +28,16 @@ octomap_server_node:
     
     # Sensor model parameters
     sensor_model:
-      max_range: 30.0      # Maximum sensor range (meters)
+      max_range: 25.0      # Maximum sensor range (meters) - Reduced to filter far points
       hit: 0.7             # Probability for occupied cell
       miss: 0.4            # Probability for free cell
       min: 0.12            # Minimum occupancy probability
       max: 0.97            # Maximum occupancy probability
+    
+    # Range filtering - Remove points at max range (not hitting anything)
+    filter_max_range: true   # Ignore points at maximum sensor range
+    filter_speckles: true    # Remove isolated voxel clusters (noise)
+    max_range_padding: 0.5   # Remove points within 0.5m of max_range
     
     # Update settings
     filter_ground: false    # Set to true to filter ground plane

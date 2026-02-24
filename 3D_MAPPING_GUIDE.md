@@ -75,6 +75,33 @@ En az 30 saniye harita oluşturduktan sonra:
 
 Harita `/home/ranim/autoCar_ws/maps/` klasörüne kaydedilir.
 
+### 5. Haritayı Optimize Edin (Localization için) 🔧
+Kaydedilen ham harita localization için optimize edilmelidir:
+```bash
+./optimize_map.sh maps/my_building.pcd my_building_clean
+```
+
+**Optimizasyon Adımları:**
+1. ✅ **Voxel Grid Filter** - Nokta yoğunluğunu düşürür (downsampling)
+2. ✅ **Outlier Removal** - Gürültülü noktaları temizler
+3. ✅ **Ground Segmentation** - Zemin noktalarını ayırır
+4. ✅ **Height Filtering** - Sadece sürüş için gerekli yüksekliği tutar (0.3m - 3.0m)
+
+**Faydaları:**
+- 🚀 Localization daha hızlı çalışır
+- 🎯 Daha stabil ve doğru konum tespiti
+- 💾 Daha küçük dosya boyutu (60-80% azalma)
+- 🧹 Gürültüsüz, temiz harita
+
+**Karşılaştırma:**
+```bash
+# Önce - Ham harita
+pcl_viewer maps/my_building.pcd
+
+# Sonra - Optimize edilmiş harita  
+pcl_viewer maps/my_building_clean.pcd
+```
+
 ## RViz'de Görselleştirme
 
 ### Otomatik (Önerilen):
@@ -160,6 +187,7 @@ sensor_model:
 | `./run_rviz_3d.sh` ⭐ | 3D RViz görselleştirmesini aç |
 | `./test_3d_slam.sh` 🔍 | Sistemin çalışıp çalışmadığını kontrol et |
 | `./save_pcd_map.sh [isim]` ⚡ | Haritayı PCD olarak kaydet (ÖNERİLEN) |
+| `./optimize_map.sh [input.pcd] [output_name]` 🔧 | Haritayı localization için optimize et |
 | `./debug_3d_slam.sh` 🐛 | Detaylı sorun tespiti |
 | `pcl_viewer maps/my_map.pcd` | Kaydedilmiş haritayı görüntüle |
 
@@ -260,12 +288,62 @@ ros2 service call /octomap_server/pause_updates std_srvs/srv/Empty
 ros2 service call /octomap_server/resume_updates std_srvs/srv/Empty
 ```
 
+## Map Optimization Detayları
+
+### Voxel Grid Filter
+```yaml
+voxel_size: 0.1  # 10cm küpler halinde birleştir
+```
+- Yakın noktaları tek noktaya indirir
+- Dosya boyutunu küçültür
+- İşlem hızını artırır
+
+### Outlier Removal
+```yaml
+nb_neighbors: 20     # Her nokta için komşu sayısı
+std_ratio: 2.0       # Standart sapma eşiği
+```
+- Gürültülü ölçümleri temizler
+- Sensör hatalarını giderir
+- Localization doğruluğunu artırır
+
+### Ground Segmentation
+```yaml
+distance_threshold: 0.2  # Zemin düzleminden mesafe (metre)
+```
+- Yol yüzeyini kaldırır
+- Sadece duvar, bina gibi landmark'ları tutar
+- Localization için kritik!
+
+### Height Filtering
+```yaml
+min_height: 0.3  # Minimum yükseklik
+max_height: 3.0  # Maksimum yükseklik
+```
+- Arabanın görebildiği yükseklikteki engelleri tutar
+- Gökyüzü, yer altı noktalarını atar
+
+### Manuel Optimizasyon Ayarları
+[src/slam_3d/scripts/optimize_map.py](src/slam_3d/scripts/optimize_map.py) dosyasında:
+```python
+# Daha agresif downsampling
+voxel_size=0.15  # Default: 0.1
+
+# Daha fazla gürültü temizliği
+std_ratio=1.5    # Default: 2.0
+
+# Daha geniş yükseklik aralığı
+min_height=0.2   # Default: 0.3
+max_height=4.0   # Default: 3.0
+```
+
 ## Performans İpuçları
 
 1. **Düşük çözünürlük** kullanın (0.1-0.2m) geniş alanlar için
 2. **Yüksek çözünürlük** kullanın (0.05m) detaylı iç mekan için
 3. **Yükseklik filtresi** kullanarak gereksiz verileri azaltın
 4. **Compression** aktif tutun (config'de `compress_map: true`)
+5. **Her zaman optimize edin** - Ham haritayı localization'da kullanmayın!
 
 ## Sonraki Adımlar
 
