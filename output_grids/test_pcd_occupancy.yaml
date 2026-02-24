@@ -1,0 +1,6 @@
+image: test_pcd_occupancy.pgm
+resolution: 0.08
+origin: [-56.724998474121094, -50.875, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
