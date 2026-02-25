@@ -177,6 +177,17 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time}]
         ),
         
+        # chassis -> sensor_link  (Gazebo LiDAR frame_name = sensor_link)
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='chassis_to_sensor_link_tf',
+            arguments=['--x', '0', '--y', '0', '--z', '1.0',
+                      '--roll', '0', '--pitch', '0', '--yaw', '0',
+                      '--frame-id', 'chassis', '--child-frame-id', 'sensor_link'],
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+        
         # chassis -> camera_link
         Node(
             package='tf2_ros',
