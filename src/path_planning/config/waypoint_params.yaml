@@ -1,0 +1,20 @@
+# Waypoint takip sistemi v5 — parametreler
+# Bu dosyayı launch parametreleri ile override edebilirsin
+
+waypoint_manager:
+  ros__parameters:
+    waypoint_file: ""          # CSV dosya yolu
+    frame_id: "map"
+    goal_tolerance: 1.5        # m — waypoint'e ulaşıldı mesafesi
+    loop: true                 # true → döngü modu
+    publish_rate: 10.0         # Hz
+    path_horizon: 50           # ilerideki kaç waypoint path'e dahil edilsin
+
+pure_pursuit:
+  ros__parameters:
+    max_speed: 2.0             # m/s — düz yolda hız
+    min_speed: 0.3             # m/s — minimum ileri hız
+    min_lookahead: 1.5         # m — minimum lookahead mesafesi
+    max_lookahead: 5.0         # m — maximum lookahead mesafesi
+    lookahead_ratio: 1.5       # speed × ratio = dinamik lookahead
+    max_omega: 1.0             # rad/s — maksimum açısal hız
