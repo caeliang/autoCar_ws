@@ -7353,8 +7353,8 @@
           <plugin name='camera_plugin' filename='libgazebo_ros_camera.so'>
             <ros>
               <namespace>/prius</namespace>
-              <remapping>~/image_raw:=camera/image_raw</remapping>
-              <remapping>~/camera_info:=camera/camera_info</remapping>
+              <remapping>~/image_raw:=front_camera/image_raw</remapping>
+              <remapping>~/camera_info:=front_camera/camera_info</remapping>
             </ros>
             <camera_name>front_camera</camera_name>
             <frame_name>camera_link</frame_name>

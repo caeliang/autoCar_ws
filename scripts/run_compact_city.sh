@@ -52,7 +52,11 @@ echo -e "${GREEN}  ✓ Cleanup complete${NC}"
 
 # Start Gazebo server
 echo -e "${YELLOW}[3/4] Starting Gazebo server...${NC}"
-gzserver --verbose "$WORLD_FILE" &
+# Load gazebo_ros plugins explicitly so /clock and ROS services are available
+gzserver --verbose \
+    -s libgazebo_ros_init.so \
+    -s libgazebo_ros_factory.so \
+    "$WORLD_FILE" &
 GZSERVER_PID=$!
 sleep 5
 

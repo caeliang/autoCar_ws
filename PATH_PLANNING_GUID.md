@@ -57,7 +57,7 @@ Sistem iki aşamalı çalışır:
 │ • Servisler      │          │ • Hız kontrolü     │
 └────────┬─────────┘          └─────────┬──────────┘
          │                              │
-         │ /localization/pose           │ /cmd_vel
+         │ /localization/pose           │ /prius/cmd_vel
          │ (map frame)                  │ (Twist)
          │                              ▼
 ┌────────┴──────────────────────────────────────────┐
@@ -239,7 +239,7 @@ Pure Pursuit geometrik yol takip algoritması. Ackermann steering modeli kullan�
 | `/waypoints/goal` | PoseStamped | → Output | `map` | Aktif hedef waypoint |
 | `/waypoints/markers` | MarkerArray | → Output | `map` | RViz marker'ları |
 | `/waypoints/status` | String | → Output | — | `ACTIVE:2/10`, `FINISHED`, `NO_WAYPOINTS` |
-| `/cmd_vel` | Twist | → Output | — | Hız + steering komutu |
+| `/prius/cmd_vel` | Twist | → Output | — | Hız + steering komutu |
 | `/pure_pursuit/lookahead` | Marker | → Output | `map` | Lookahead çizgisi + daire |
 
 ### Servisler
