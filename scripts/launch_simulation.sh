@@ -32,9 +32,9 @@ sleep 1
 # Launch Gazebo with the world file
 if [ "$1" == "--background" ]; then
     echo "Starting simulation in background..."
-    gazebo "$WORKSPACE_DIR/src/worlds/simple_city_copy.world" --verbose &
+    gazebo "$WORKSPACE_DIR/src/worlds/compact_city.world" --verbose &
     sleep 5
     echo "Simulation started. PID: $!"
 else
-    gazebo "$WORKSPACE_DIR/src/worlds/simple_city_copy.world" --verbose
+    gazebo "$WORKSPACE_DIR/src/worlds/compact_city.world" --verbose
 fi

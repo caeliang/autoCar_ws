@@ -59,56 +59,56 @@ namespace gazebo
       // Publisher for visual messages
       this->visPub = this->node->Advertise<msgs::Visual>("~/visual");
       
-      // Setup traffic light groups - mirroring what's in the world file
+      // Setup traffic light groups - mirroring what's in the world file (compact_city.world)
       // Intersection 1
       groups.push_back(TrafficLightGroup(
         "intersection_1_NS",
-        {"stop_light_post_475", "stop_light_post_479"},
+        {"stop_light_post_1", "stop_light_post_5"},
         20.0, 3.0, 23.0, 0.0
       ));
       
       groups.push_back(TrafficLightGroup(
         "intersection_1_EW",
-        {"stop_light_post_482", "stop_light_post_485"},
+        {"stop_light_post_10", "stop_light_post_6"},
         20.0, 3.0, 23.0, 23.0  // Offset so EW is red when NS is green
       ));
       
       // Intersection 2
       groups.push_back(TrafficLightGroup(
         "intersection_2_NS",
-        {"stop_light_post_476", "stop_light_post_480"},
+        {"stop_light_post_11", "stop_light_post_12"},
         20.0, 3.0, 23.0, 5.0
       ));
       
       groups.push_back(TrafficLightGroup(
         "intersection_2_EW",
-        {"stop_light_post_483"},
+        {"stop_light_post_2"},
         20.0, 3.0, 23.0, 28.0
       ));
       
       // Intersection 3
       groups.push_back(TrafficLightGroup(
         "intersection_3_NS",
-        {"stop_light_post_477", "stop_light_post_481"},
+        {"stop_light_post_3", "stop_light_post_4"},
         20.0, 3.0, 23.0, 10.0
       ));
       
       groups.push_back(TrafficLightGroup(
         "intersection_3_EW",
-        {"stop_light_post_486"},
+        {"stop_light_post_7"},
         20.0, 3.0, 23.0, 33.0
       ));
       
       // Intersection 4
       groups.push_back(TrafficLightGroup(
         "intersection_4_NS",
-        {"stop_light_post_478"},
+        {"stop_light_post_8"},
         20.0, 3.0, 23.0, 15.0
       ));
       
       groups.push_back(TrafficLightGroup(
         "intersection_4_EW",
-        {"stop_light_post_484", "stop_light_post_487"},
+        {"stop_light_post_9"},
         20.0, 3.0, 23.0, 38.0
       ));
       
@@ -171,58 +171,74 @@ namespace gazebo
           }
           
           // Log state change
+          /*
           std::string stateStr = (newState == LightState::GREEN) ? "GREEN" :
                                   (newState == LightState::YELLOW) ? "YELLOW" : "RED";
           gzmsg << group.groupId << " -> " << stateStr << std::endl;
+          */
         }
       }
     }
     
     void SetLightColor(const std::string& modelName, LightState state)
     {
-      // The stop_light_post model contains nested stop_light models
-      // Each stop_light has red, yellow, green visuals
-      std::vector<std::string> nestedLights = {"right_light", "center_light"};
-      std::vector<std::string> colorVisuals = {"red", "yellow", "green"};
-      
-      // Define emissive colors for each state
-      std::map<std::string, ignition::math::Color> emissiveOn, emissiveOff;
-      emissiveOn["red"] = ignition::math::Color(1, 0, 0, 1);
-      emissiveOn["yellow"] = ignition::math::Color(1, 1, 0, 1);
-      emissiveOn["green"] = ignition::math::Color(0, 1, 0, 1);
-      
-      emissiveOff["red"] = ignition::math::Color(0.1, 0, 0, 1);
-      emissiveOff["yellow"] = ignition::math::Color(0.1, 0.1, 0, 1);
-      emissiveOff["green"] = ignition::math::Color(0, 0.1, 0, 1);
-      
-      std::string activeColor;
-      switch (state)
-      {
-        case LightState::RED: activeColor = "red"; break;
-        case LightState::YELLOW: activeColor = "yellow"; break;
-        case LightState::GREEN: activeColor = "green"; break;
-      }
-      
-      for (const auto& nested : nestedLights)
-      {
-        for (const auto& colorVis : colorVisuals)
+        std::string activeColor;
+        switch (state)
         {
-          // Visual name format: modelName::nestedLight::link::visualName
-          std::string visualName = modelName + "::" + nested + "::link::" + colorVis;
-          
-          msgs::Visual visMsg;
-          visMsg.set_name(visualName);
-          visMsg.set_parent_name(modelName + "::" + nested + "::link");
-          
-          // Set emissive color
-          ignition::math::Color color = (colorVis == activeColor) ? 
-                                         emissiveOn[colorVis] : emissiveOff[colorVis];
-          
-          msgs::Set(visMsg.mutable_material()->mutable_emissive(), color);
-          
-          this->visPub->Publish(visMsg);
+            case LightState::RED:    activeColor = "red";    break;
+            case LightState::YELLOW: activeColor = "yellow"; break;
+            case LightState::GREEN:  activeColor = "green";  break;
         }
-      }
+
+        // Define emissive colors for each state
+        std::map<std::string, ignition::math::Color> colorOn, colorOff;
+
+        colorOn["red"]    = ignition::math::Color(1.0, 0.0, 0.0, 1);
+        colorOn["yellow"] = ignition::math::Color(1.0, 0.8, 0.0, 1);
+        colorOn["green"]  = ignition::math::Color(0.0, 1.0, 0.0, 1);
+
+        // Dim (mat) versions of the same colors
+        colorOff["red"]    = ignition::math::Color(0.25, 0.0, 0.0, 1);
+        colorOff["yellow"] = ignition::math::Color(0.25, 0.2, 0.0, 1);
+        colorOff["green"]  = ignition::math::Color(0.0, 0.25, 0.0, 1);
+        
+        std::vector<std::string> nestedLights = {"right_light", "center_light"};
+        std::vector<std::string> colorVisuals = {"red", "yellow", "green"};
+
+        for (const auto& nested : nestedLights)
+        {
+            for (const auto& colorVis : colorVisuals)
+            {
+                // Try both visual name formats to be sure
+                std::vector<std::string> visualNames = {
+                    modelName + "::" + nested + "::link::" + colorVis,
+                    modelName + "::" + nested + "::" + colorVis
+                };
+
+                for (const auto& visualName : visualNames)
+                {
+                    msgs::Visual visMsg;
+                    visMsg.set_name(visualName);
+                    visMsg.set_parent_name(modelName);
+                    
+                    ignition::math::Color color = (colorVis == activeColor) ? 
+                                                   colorOn[colorVis] : colorOff[colorVis];
+                    
+                    msgs::Material* mat = visMsg.mutable_material();
+                    
+                    // Do NOT set empty script name, it causes "Empty string used when setting a required parameter" error
+                    // Instead, we will just set the color properties directly which should override the script
+                    
+                    // Set all color components to ensure visibility
+                    msgs::Set(mat->mutable_ambient(), color);
+                    msgs::Set(mat->mutable_diffuse(), color);
+                    msgs::Set(mat->mutable_specular(), color);
+                    msgs::Set(mat->mutable_emissive(), color);
+                    
+                    this->visPub->Publish(visMsg);
+                }
+            }
+        }
     }
     
   private:

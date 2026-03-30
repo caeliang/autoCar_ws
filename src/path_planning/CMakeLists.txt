@@ -5,36 +5,57 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED) 
-
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 include_directories(include)
 
-find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
-include_directories(${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS})
+add_library(waypoint_utils
+  src/waypoint_io.cpp
+  src/waypoint_visualizer.cpp
+)
+ament_target_dependencies(waypoint_utils rclcpp visualization_msgs geometry_msgs)
 
-add_executable(path_planner_node src/path_planner_node.cpp src/AStar.cpp src/global.cpp src/visualize.cpp)
-ament_target_dependencies(path_planner_node rclcpp)
-target_link_libraries(path_planner_node ${Python3_LIBRARIES})
-option(USE_NATIVE_OPTIMIZATIONS "Enable aggressive compiler optimizations (O3/march=native)" ON)
-if(USE_NATIVE_OPTIMIZATIONS)
-  set(PERF_FLAGS -O3 -march=native -flto)
-else()
-  set(PERF_FLAGS -O3)
-endif()
-target_compile_options(path_planner_node PRIVATE ${PERF_FLAGS})
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  # Linker flags for LTO; target_link_options requires CMake >= 3.13
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.13")
-    target_link_options(path_planner_node PRIVATE ${PERF_FLAGS})
-  else()
-    string(REPLACE ";" " " PERF_FLAGS_LINK "${PERF_FLAGS}")
-    set_target_properties(path_planner_node PROPERTIES LINK_FLAGS "${PERF_FLAGS_LINK}")
-  endif()
-endif()
-install(TARGETS path_planner_node DESTINATION lib/${PROJECT_NAME})
+add_executable(waypoint_manager src/waypoint_manager_node.cpp)
+target_link_libraries(waypoint_manager waypoint_utils)
+ament_target_dependencies(waypoint_manager rclcpp geometry_msgs nav_msgs std_msgs)
+
+add_executable(pure_pursuit src/pure_pursuit_node.cpp)
+ament_target_dependencies(pure_pursuit rclcpp nav_msgs geometry_msgs)
+
+add_executable(lane_path_follower src/lane_path_follower.cpp)
+ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs)
+
+add_executable(waypoint_lane_fusion src/waypoint_lane_fusion_node.cpp)
+ament_target_dependencies(waypoint_lane_fusion rclcpp geometry_msgs nav_msgs)
+
+install(TARGETS
+  waypoint_manager
+  pure_pursuit
+  lane_path_follower
+  waypoint_lane_fusion
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
+)
+
+install(DIRECTORY launch config
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  scripts/waypoint_recorder.py
+  scripts/waypoint_visualizer.py
+  scripts/road_network.py
+  scripts/route_generator.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 
 if(BUILD_TESTING)
