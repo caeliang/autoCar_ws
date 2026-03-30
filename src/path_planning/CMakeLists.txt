@@ -37,7 +37,6 @@ install(TARGETS
   waypoint_manager
   pure_pursuit
   lane_path_follower
-  waypoint_lane_fusion
   DESTINATION lib/${PROJECT_NAME}
 )
 
