@@ -5,9 +5,30 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
+
+add_executable(camera_subscriber src/camera_subscriber.cpp)
+ament_target_dependencies(camera_subscriber rclcpp sensor_msgs)
+
+add_executable(lane_detector_node
+  src/lane_detector_node.cpp
+  src/lane_detector.cpp
+)
+ament_target_dependencies(lane_detector_node rclcpp sensor_msgs geometry_msgs cv_bridge)
+target_link_libraries(lane_detector_node ${OpenCV_LIBRARIES})
+
+install(TARGETS
+  camera_subscriber
+  lane_detector_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
