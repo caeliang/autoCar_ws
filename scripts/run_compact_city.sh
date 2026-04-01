@@ -33,7 +33,7 @@ source install/setup.bash
 
 # Set environment variables
 WORKSPACE_DIR="$HOME/autoCar_ws"
-WORLD_FILE="$WORKSPACE_DIR/src/worlds/compact_city.world"
+WORLD_FILE="$WORKSPACE_DIR/src/worlds/compact_city_scaled.world"
 MODELS_PATH="$WORKSPACE_DIR/src/models"
 PLUGIN_PATH="$WORKSPACE_DIR/install/gazebo_traffic_light_plugin/lib"
 

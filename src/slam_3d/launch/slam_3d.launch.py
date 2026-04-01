@@ -30,6 +30,17 @@ def generate_launch_description():
         ),
         
         # ==========================================
+        # Static Transform - Link chassis to sensor_link
+        # ==========================================
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_tf_chassis_to_sensor',
+            arguments=['0', '0', '1.5', '0', '0', '0', 'chassis', 'sensor_link'],
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+
+        # ==========================================
         # EKF Node - Fuses Odom + IMU
         # ==========================================
         Node(
