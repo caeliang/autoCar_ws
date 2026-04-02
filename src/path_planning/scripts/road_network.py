@@ -35,10 +35,10 @@ HORIZONTAL_ROADS = {
 
 # Dikey yollar (N-S) → x sabittir
 VERTICAL_ROADS = {
-    'west':       {'x': -27.5, 'y_ranges': [(27.5, 22.5), (12.5, 2.5), (-7.5, -17.5)]},
-    'inner_west': {'x': -12.5, 'y_ranges': [(27.5, 22.5), (12.5, 2.5), (-7.5, -17.5)]},
-    'inner_east': {'x':  12.5, 'y_ranges': [(27.5, 22.5), (12.5, 2.5), (-7.5, -17.5)]},
-    'east':       {'x':  27.5, 'y_ranges': [(27.5, 22.5), (12.5, 2.5), (-7.5, -17.5)]},
+    'west':       {'x': -27.5, 'y_ranges': [(32.5, -22.5)]},
+    'inner_west': {'x': -12.5, 'y_ranges': [(32.5, -22.5)]},
+    'inner_east': {'x':  12.5, 'y_ranges': [(32.5, -22.5)]},
+    'east':       {'x':  27.5, 'y_ranges': [(32.5, -22.5)]},
     'spur':       {'x':   2.5, 'y_ranges': [(-27.5, -32.5)]},
 }
 
@@ -117,105 +117,95 @@ class RoadNetwork:
     #  Yatay Yol Şeritleri (E-W)
     # ═══════════════════════════════════════════════════════════════════
     def _build_horizontal_lanes(self):
-        """Yatay yollar → iki şerit: doğuya giden (üst), batıya giden (alt)."""
+        """Yatay yollar → iki şerit: doğuya giden (alt), batıya giden (üst). SAĞDAN AKAN TRAFİK"""
         for name, info in HORIZONTAL_ROADS.items():
             y_center = info['y']
             x_min, x_max = info['x_range']
+            hw = TILE_SIZE / 2.0
 
-            # Doğuya giden şerit (y + offset) — yol merkezinin kuzeyinde
-            east_lane = LaneSegment(
-                name=f'{name}_east',
-                direction='east'
-            )
-            y_east = y_center + self.lane_offset
+            # Doğuya giden şerit (Right-hand traffic: South of center -> y - offset)
+            east_lane = LaneSegment(name=f'{name}_east', direction='east')
+            y_east = y_center - self.lane_offset
             x = x_min
             while x <= x_max + 0.01:
-                east_lane.points.append(LanePoint(
-                    x=x, y=y_east, yaw=0.0  # doğuya
-                ))
+                dist_to_roundabout = math.sqrt((x - ROUNDABOUT_CENTER[0])**2 + (y_east - ROUNDABOUT_CENTER[1])**2)
+                in_intersection = False
+                for (cx, cy) in INTERSECTION_CENTERS:
+                    if abs(x - cx) < hw and abs(y_center - cy) < hw:
+                        in_intersection = True
+                        break
+                        
+                if dist_to_roundabout > ROUNDABOUT_RADIUS - 1.0 and not in_intersection:
+                    east_lane.points.append(LanePoint(x=x, y=y_east, yaw=0.0))
                 x += self.wp_spacing
-            self.segments.append(east_lane)
+            
+            if east_lane.points: self.segments.append(east_lane)
 
-            # Batıya giden şerit (y - offset) — yol merkezinin güneyinde
-            west_lane = LaneSegment(
-                name=f'{name}_west',
-                direction='west'
-            )
-            y_west = y_center - self.lane_offset
+            # Batıya giden şerit (Right-hand traffic: North of center -> y + offset)
+            west_lane = LaneSegment(name=f'{name}_west', direction='west')
+            y_west = y_center + self.lane_offset
             x = x_max
             while x >= x_min - 0.01:
-                west_lane.points.append(LanePoint(
-                    x=x, y=y_west, yaw=math.pi  # batıya
-                ))
+                dist_to_roundabout = math.sqrt((x - ROUNDABOUT_CENTER[0])**2 + (y_west - ROUNDABOUT_CENTER[1])**2)
+                in_intersection = False
+                for (cx, cy) in INTERSECTION_CENTERS:
+                    if abs(x - cx) < hw and abs(y_center - cy) < hw:
+                        in_intersection = True
+                        break
+
+                if dist_to_roundabout > ROUNDABOUT_RADIUS - 1.0 and not in_intersection:
+                    west_lane.points.append(LanePoint(x=x, y=y_west, yaw=math.pi))
                 x -= self.wp_spacing
-            self.segments.append(west_lane)
+                
+            if west_lane.points: self.segments.append(west_lane)
 
     # ═══════════════════════════════════════════════════════════════════
     #  Dikey Yol Şeritleri (N-S)
     # ═══════════════════════════════════════════════════════════════════
     def _build_vertical_lanes(self):
-        """Dikey yollar → iki şerit: kuzeye giden (sağ), güneye giden (sol)."""
+        """Dikey yollar → iki şerit: kuzeye giden (sağ), güneye giden (sol). SAĞDAN AKAN TRAFİK"""
         for name, info in VERTICAL_ROADS.items():
             x_center = info['x']
+            hw = TILE_SIZE / 2.0
 
             for i, (y_start, y_end) in enumerate(info['y_ranges']):
                 seg_name = f'{name}_seg{i}'
+                ys = max(y_start, y_end)
+                ye = min(y_start, y_end)
 
-                if y_start > y_end:
-                    # Güneye giden — yol merkezinin batısında (x - offset)
-                    south_lane = LaneSegment(
-                        name=f'{seg_name}_south',
-                        direction='south'
-                    )
-                    x_south = x_center - self.lane_offset
-                    y = y_start
-                    while y >= y_end - 0.01:
-                        south_lane.points.append(LanePoint(
-                            x=x_south, y=y, yaw=-math.pi / 2  # güneye
-                        ))
-                        y -= self.wp_spacing
-                    self.segments.append(south_lane)
+                # Güneye giden (Right-hand traffic: West of center -> x - offset)
+                south_lane = LaneSegment(name=f'{seg_name}_south', direction='south')
+                x_south = x_center - self.lane_offset
+                y = ys
+                while y >= ye - 0.01:
+                    dist_to_roundabout = math.sqrt((x_south - ROUNDABOUT_CENTER[0])**2 + (y - ROUNDABOUT_CENTER[1])**2)
+                    in_intersection = False
+                    for (cx, cy) in INTERSECTION_CENTERS:
+                        if abs(x_center - cx) < hw and abs(y - cy) < hw:
+                            in_intersection = True
+                            break
 
-                    # Kuzeye giden — yol merkezinin doğusunda (x + offset)
-                    north_lane = LaneSegment(
-                        name=f'{seg_name}_north',
-                        direction='north'
-                    )
-                    x_north = x_center + self.lane_offset
-                    y = y_end
-                    while y <= y_start + 0.01:
-                        north_lane.points.append(LanePoint(
-                            x=x_north, y=y, yaw=math.pi / 2  # kuzeye
-                        ))
-                        y += self.wp_spacing
-                    self.segments.append(north_lane)
-                else:
-                    # y_start < y_end → güneye doğru (ters sırada)
-                    south_lane = LaneSegment(
-                        name=f'{seg_name}_south',
-                        direction='south'
-                    )
-                    x_south = x_center - self.lane_offset
-                    y = y_end
-                    while y >= y_start - 0.01:
-                        south_lane.points.append(LanePoint(
-                            x=x_south, y=y, yaw=-math.pi / 2
-                        ))
-                        y -= self.wp_spacing
-                    self.segments.append(south_lane)
+                    if dist_to_roundabout > ROUNDABOUT_RADIUS - 1.0 and not in_intersection:
+                        south_lane.points.append(LanePoint(x=x_south, y=y, yaw=-math.pi / 2))
+                    y -= self.wp_spacing
+                if south_lane.points: self.segments.append(south_lane)
 
-                    north_lane = LaneSegment(
-                        name=f'{seg_name}_north',
-                        direction='north'
-                    )
-                    x_north = x_center + self.lane_offset
-                    y = y_start
-                    while y <= y_end + 0.01:
-                        north_lane.points.append(LanePoint(
-                            x=x_north, y=y, yaw=math.pi / 2
-                        ))
-                        y += self.wp_spacing
-                    self.segments.append(north_lane)
+                # Kuzeye giden (Right-hand traffic: East of center -> x + offset)
+                north_lane = LaneSegment(name=f'{seg_name}_north', direction='north')
+                x_north = x_center + self.lane_offset
+                y = ye
+                while y <= ys + 0.01:
+                    dist_to_roundabout = math.sqrt((x_north - ROUNDABOUT_CENTER[0])**2 + (y - ROUNDABOUT_CENTER[1])**2)
+                    in_intersection = False
+                    for (cx, cy) in INTERSECTION_CENTERS:
+                        if abs(x_center - cx) < hw and abs(y - cy) < hw:
+                            in_intersection = True
+                            break
+
+                    if dist_to_roundabout > ROUNDABOUT_RADIUS - 1.0 and not in_intersection:
+                        north_lane.points.append(LanePoint(x=x_north, y=y, yaw=math.pi / 2))
+                    y += self.wp_spacing
+                if north_lane.points: self.segments.append(north_lane)
 
     # ═══════════════════════════════════════════════════════════════════
     #  Kavşak Dönüş Bağlantıları
@@ -223,107 +213,100 @@ class RoadNetwork:
     def _build_intersection_connectors(self):
         """
         Kavşaklarda dönüş yayları oluştur.
-        Her kavşakta 4 yönden 4 yöne dönüş mümkün.
-        Sağdan gelen → sağdan gider kuralı.
+        (Sağdan akan trafik kurallarına göre Sağ ve Sol dönüşler, Quadratic Bezier)
         """
         for (cx, cy) in INTERSECTION_CENTERS:
-            # Döner kavşak bölgesindeyse atla
-            dist_to_roundabout = math.sqrt(
-                (cx - ROUNDABOUT_CENTER[0]) ** 2 +
-                (cy - ROUNDABOUT_CENTER[1]) ** 2
-            )
+            dist_to_roundabout = math.sqrt((cx - ROUNDABOUT_CENTER[0])**2 + (cy - ROUNDABOUT_CENTER[1])**2)
             if dist_to_roundabout < ROUNDABOUT_RADIUS + 2.0:
                 continue
 
-            r = self.lane_offset * 1.5  # dönüş yarıçapı
+            L = self.lane_offset
+            HW = TILE_SIZE / 2.0
+            
+            def check_dir(dir_name):
+                # Harita sınırları (yolların sonu)
+                xmin, xmax = -27.5, 27.5
+                ymin, ymax = -22.5, 32.5
+                # Yol merkezine göre dışarı taşmıyorsak o yönde yol vardır:
+                if dir_name == "west": return cx > xmin
+                if dir_name == "east": return cx < xmax
+                if dir_name == "north": return cy < ymax
+                if dir_name == "south": return cy > ymin
+                return True
 
-            # ── Sağa dönüşler (90°) ──
-            turns = [
-                # (from_dir, to_dir, start_x, start_y, end_x, end_y)
-                # Doğudan gelip güneye dönüş
-                ('east_to_south', 'east', 'south',
-                 cx + self.lane_offset, cy + self.lane_offset,   # doğu şeridinden
-                 cx + self.lane_offset, cy - self.lane_offset,   # güney şeridine
-                 -math.pi / 2),  # son yaw
-                # Güneyden gelip batıya dönüş
-                ('south_to_west', 'south', 'west',
-                 cx - self.lane_offset, cy - self.lane_offset,
-                 cx - self.lane_offset, cy - self.lane_offset,
-                 math.pi),
-                # Batıdan gelip kuzeye dönüş
-                ('west_to_north', 'west', 'north',
-                 cx - self.lane_offset, cy - self.lane_offset,
-                 cx - self.lane_offset, cy + self.lane_offset,
-                 math.pi / 2),
-                # Kuzeyden gelip doğuya dönüş
-                ('north_to_east', 'north', 'east',
-                 cx + self.lane_offset, cy + self.lane_offset,
-                 cx + self.lane_offset, cy + self.lane_offset,
-                 0.0),
-            ]
+            has_w = check_dir("west")
+            has_e = check_dir("east")
+            has_n = check_dir("north")
+            has_s = check_dir("south")
 
-            for turn_name, from_d, to_d, sx, sy, ex, ey, end_yaw in turns:
-                seg = LaneSegment(
-                    name=f'turn_{turn_name}_at_{cx:.0f}_{cy:.0f}',
-                    direction=f'{from_d}_to_{to_d}'
-                )
-                # Basit ark oluştur (quadratic Bezier benzeri)
-                n_points = max(5, int(math.pi * r / (2 * self.wp_spacing)))
+            # turns listesi:
+            # name, has_in, has_out, start_x, start_y, start_yaw, end_x, end_y, end_yaw, (c_dx, c_dy) -> tangents intersection!
+            turns = []
+
+            # 1. West Input (Heading East, arriving at cx-HW)
+            # Arrives at: y = cy - L
+            if has_w and has_s: # Right turn to South
+                turns.append(('turn_right_west_to_south', cx - HW, cy - L, 0.0, cx - L, cy - HW, -math.pi/2, cx - L, cy - L))
+            if has_w and has_n: # Left turn to North
+                turns.append(('turn_left_west_to_north', cx - HW, cy - L, 0.0, cx + L, cy + HW, math.pi/2, cx + L, cy - L))
+                
+            # 2. East Input (Heading West, arriving at cx+HW)
+            # Arrives at: y = cy + L
+            if has_e and has_n: # Right turn to North
+                turns.append(('turn_right_east_to_north', cx + HW, cy + L, math.pi, cx + L, cy + HW, math.pi/2, cx + L, cy + L))
+            if has_e and has_s: # Left turn to South
+                turns.append(('turn_left_east_to_south', cx + HW, cy + L, math.pi, cx - L, cy - HW, -math.pi/2, cx - L, cy + L))
+                
+            # 3. South Input (Heading North, arriving at cy-HW)
+            # Arrives at: x = cx + L
+            if has_s and has_e: # Right turn to East
+                turns.append(('turn_right_south_to_east', cx + L, cy - HW, math.pi/2, cx + HW, cy - L, 0.0, cx + L, cy - L))
+            if has_s and has_w: # Left turn to West
+                turns.append(('turn_left_south_to_west', cx + L, cy - HW, math.pi/2, cx - HW, cy + L, math.pi, cx + L, cy + L))
+
+            # 4. North Input (Heading South, arriving at cy+HW)
+            # Arrives at: x = cx - L
+            if has_n and has_w: # Right turn to West
+                turns.append(('turn_right_north_to_west', cx - L, cy + HW, -math.pi/2, cx - HW, cy + L, math.pi, cx - L, cy + L))
+            if has_n and has_e: # Left turn to East
+                turns.append(('turn_left_north_to_east', cx - L, cy + HW, -math.pi/2, cx + HW, cy - L, 0.0, cx - L, cy - L))
+
+            for s_name, sx, sy, syaw, ex, ey, eyaw, ctx, cty in turns:
+                seg = LaneSegment(name=f'{s_name}_at_{cx:.0f}_{cy:.0f}', direction=s_name)
+                # Bezier egrisi uzerinde noktalar
+                import math as m
+                dist = math.sqrt((ex - sx)**2 + (ey - sy)**2)
+                # Arcs are long, left turns are longer than right turns
+                n_points = max(5, int(dist * 1.5 / self.wp_spacing))
                 for j in range(n_points + 1):
                     t = j / n_points
-                    px = sx + (ex - sx) * t
-                    py = sy + (ey - sy) * t
-                    # Yaw'ı enterpolasyon yap
-                    start_yaw = self._dir_to_yaw(from_d)
-                    yaw = start_yaw + (end_yaw - start_yaw) * t
-                    # Yaw normalizasyonu
+                    px = (1 - t)**2 * sx + 2 * (1 - t) * t * ctx + t**2 * ex
+                    py = (1 - t)**2 * sy + 2 * (1 - t) * t * cty + t**2 * ey
+                    
+                    diff = (eyaw - syaw + math.pi) % (2 * math.pi) - math.pi
+                    yaw = syaw + diff * t
                     yaw = math.atan2(math.sin(yaw), math.cos(yaw))
                     seg.points.append(LanePoint(x=px, y=py, yaw=yaw))
-
-                if len(seg.points) >= 2:
-                    self.segments.append(seg)
+                self.segments.append(seg)
 
             # ── Düz geçişler ──
-            straights = [
-                # Doğudan doğuya (düz devam)
-                ('through_east',
-                 cx - TILE_SIZE / 2, cy + self.lane_offset,
-                 cx + TILE_SIZE / 2, cy + self.lane_offset,
-                 0.0),
-                # Batıdan batıya
-                ('through_west',
-                 cx + TILE_SIZE / 2, cy - self.lane_offset,
-                 cx - TILE_SIZE / 2, cy - self.lane_offset,
-                 math.pi),
-                # Kuzeyden kuzeye
-                ('through_north',
-                 cx + self.lane_offset, cy - TILE_SIZE / 2,
-                 cx + self.lane_offset, cy + TILE_SIZE / 2,
-                 math.pi / 2),
-                # Güneyden güneye
-                ('through_south',
-                 cx - self.lane_offset, cy + TILE_SIZE / 2,
-                 cx - self.lane_offset, cy - TILE_SIZE / 2,
-                 -math.pi / 2),
-            ]
+            straights = []
+            if has_e and has_w:
+                straights.append(('through_west', cx + HW, cy + L, cx - HW, cy + L, math.pi))
+                straights.append(('through_east', cx - HW, cy - L, cx + HW, cy - L, 0.0))
+            if has_n and has_s:
+                straights.append(('through_south', cx - L, cy + HW, cx - L, cy - HW, -math.pi / 2))
+                straights.append(('through_north', cx + L, cy - HW, cx + L, cy + HW, math.pi / 2))
 
             for s_name, sx, sy, ex, ey, yaw in straights:
-                seg = LaneSegment(
-                    name=f'{s_name}_at_{cx:.0f}_{cy:.0f}',
-                    direction=s_name
-                )
+                seg = LaneSegment(name=f'{s_name}_at_{cx:.0f}_{cy:.0f}', direction=s_name)
                 dist = math.sqrt((ex - sx) ** 2 + (ey - sy) ** 2)
                 n_pts = max(2, int(dist / self.wp_spacing))
                 for j in range(n_pts + 1):
                     t = j / n_pts
-                    seg.points.append(LanePoint(
-                        x=sx + (ex - sx) * t,
-                        y=sy + (ey - sy) * t,
-                        yaw=yaw
-                    ))
+                    seg.points.append(LanePoint(x=sx + (ex - sx) * t, y=sy + (ey - sy) * t, yaw=yaw))
                 self.segments.append(seg)
 
-    # ═══════════════════════════════════════════════════════════════════
     #  Döner Kavşak Şeritleri
     # ═══════════════════════════════════════════════════════════════════
     def _build_roundabout_lanes(self):
