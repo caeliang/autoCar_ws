@@ -82,23 +82,6 @@ def generate_grid_from_csv(input_csv, output_txt, output_npy=None, resolution=1.
                         if 0 <= ny < height and 0 <= nx < width:
                              grid[ny][nx] = 1
 
-    # Yolun ortasindaki 0'lari (bosluklari) kapatmak icin yatay ve dikey tarama (Gap Filling)
-    for y in range(height):
-        for x in range(width - 2):
-            if grid[y][x] == 1 and grid[y][x+1] == 0 and grid[y][x+2] == 1:
-                grid[y][x+1] = 1
-            if x < width - 3 and grid[y][x] == 1 and grid[y][x+1] == 0 and grid[y][x+2] == 0 and grid[y][x+3] == 1:
-                grid[y][x+1] = 1
-                grid[y][x+2] = 1
-
-    for x in range(width):
-        for y in range(height - 2):
-            if grid[y][x] == 1 and grid[y+1][x] == 0 and grid[y+2][x] == 1:
-                grid[y+1][x] = 1
-            if y < height - 3 and grid[y][x] == 1 and grid[y+1][x] == 0 and grid[y+2][x] == 0 and grid[y+3][x] == 1:
-                grid[y+1][x] = 1
-                grid[y+2][x] = 1
-
     os.makedirs(os.path.dirname(output_txt), exist_ok=True)
     with open(output_txt, 'w') as f:
         for row in reversed(grid):

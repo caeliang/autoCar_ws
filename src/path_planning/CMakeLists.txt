@@ -11,6 +11,14 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(perception REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/DenseWaypoints.msg"
+  DEPENDENCIES geometry_msgs std_msgs
+)
 
 include_directories(include)
 
@@ -22,21 +30,31 @@ ament_target_dependencies(waypoint_utils rclcpp visualization_msgs geometry_msgs
 
 add_executable(waypoint_manager src/waypoint_manager_node.cpp)
 target_link_libraries(waypoint_manager waypoint_utils)
-ament_target_dependencies(waypoint_manager rclcpp geometry_msgs nav_msgs std_msgs)
+ament_target_dependencies(waypoint_manager rclcpp geometry_msgs nav_msgs std_msgs std_srvs)
 
 add_executable(pure_pursuit src/pure_pursuit_node.cpp)
-ament_target_dependencies(pure_pursuit rclcpp nav_msgs geometry_msgs)
+ament_target_dependencies(pure_pursuit rclcpp nav_msgs geometry_msgs visualization_msgs)
 
 add_executable(lane_path_follower src/lane_path_follower.cpp)
-ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs)
+ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs visualization_msgs)
 
-add_executable(waypoint_lane_fusion src/waypoint_lane_fusion_node.cpp)
-ament_target_dependencies(waypoint_lane_fusion rclcpp geometry_msgs nav_msgs)
+# add_executable(waypoint_lane_fusion src/waypoint_lane_fusion_node.cpp)
+# ament_target_dependencies(waypoint_lane_fusion rclcpp geometry_msgs nav_msgs)
+
+add_executable(a_star_planner src/a_star_planner.cpp)
+ament_target_dependencies(a_star_planner rclcpp)
+
+add_executable(path_planning_main src/path_planning_main.cpp)
+ament_target_dependencies(path_planning_main rclcpp)
+
+rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 install(TARGETS
   waypoint_manager
   pure_pursuit
   lane_path_follower
+  a_star_planner
+  path_planning_main
   DESTINATION lib/${PROJECT_NAME}
 )
 
