@@ -1,34 +1,55 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────
-#  Otomatik Rota Oluşturucu
+#  Otomatik Rota Oluşturucu + Yaw Hesaplaması
 #  Harita asphalt bloklarından 2-şeritli waypoint üretir.
-#  ARTIK ARACI SÜRMENİZE GEREK YOK!
+#  YAW DEĞERLERİ OTOMATİK OLARAK HESAPLANIR!
 #
 #  Kullanım:
-#    ./scripts/generate_route.sh                    # interaktif mod
-#    ./scripts/generate_route.sh --route west_south  # hazır rota
-#    ./scripts/generate_route.sh --list-routes       # rotaları listele
-#    ./scripts/generate_route.sh --generate-all      # tüm rotaları üret
-#    ./scripts/generate_route.sh --custom -28 32 27 -22  # özel rota
+#    ./scripts/generate_route.sh
 #
-#  Seçenekler:
-#    --spacing 1.0    Waypoint arası mesafe (m)
-#    --speed 1.5      Hedef hız (m/s)
-#    --output file    Çıktı dosyası
+#  İşlem:
+#    1. RoadNetwork'ten waypoint oluştur
+#    2. atan2(Δy, Δx) formülü ile yaw hesapla
+#    3. Görselle göster
 # ──────────────────────────────────────────────────────────────────────
 set -e
 
 WS=~/autoCar_ws
-SCRIPT="$WS/src/path_planning/scripts/route_generator.py"
+GENERATE_SCRIPT="$WS/src/path_planning/scripts/generate_full_map.py"
+VISUALIZE_SCRIPT="$WS/scripts/visualize_waypoints_yaw.py"
+WAYPOINTS_FILE="$WS/waypoints/full_road_map.csv"
+GRID_FILE="$WS/matrices/road_grid_4wide.txt"
 
-if [ ! -f "$SCRIPT" ]; then
-    echo "✗ Script bulunamadı: $SCRIPT"
+if [ ! -f "$GENERATE_SCRIPT" ]; then
+    echo "✗ Script bulunamadı: $GENERATE_SCRIPT"
     exit 1
 fi
 
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  🗺️  OTOMATİK ROTA OLUŞTURUCU"
-echo "  Asphalt bloklarından 2-şeritli waypoint"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  🗺️  OTOMATİK ROTA OLUŞTURUCU + YAW HESAPLAMASı"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo
 
-python3 "$SCRIPT" "$@"
+# Step 1: Waypoints + Yaw Hesaplama (tek script)
+echo "[1/2] Waypoints oluşturuluyor ve yaw hesaplanıyor..."
+python3 "$GENERATE_SCRIPT"
+
+# Step 2: Görselleştirme (tüm waypoints)
+if [ -f "$VISUALIZE_SCRIPT" ] && [ -f "$WAYPOINTS_FILE" ]; then
+    echo "[2/2] Görselleştirme oluşturuluyor (tüm waypoints)..."
+    if [ -f "$GRID_FILE" ]; then
+        OUTPUT_VIZ="$WS/waypoints/waypoints_all_points.png"
+        timeout 30 python3 "$VISUALIZE_SCRIPT" "$WAYPOINTS_FILE" "$GRID_FILE" "$OUTPUT_VIZ" 1 2>/dev/null || true
+        echo "✓ Görselleştirme: $OUTPUT_VIZ"
+    else
+        echo "⚠ Grid dosyası bulunamadı, görselleştirme atlanıyor"
+    fi
+fi
+
+echo
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✓ TAMAMLANDI!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo
+echo "Waypoints dosyası: $WAYPOINTS_FILE"
+[ -f "$WS/waypoints/waypoints_all_points.png" ] && echo "Görselleştirme: $WS/waypoints/waypoints_all_points.png"

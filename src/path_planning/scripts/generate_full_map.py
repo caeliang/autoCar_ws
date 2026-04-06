@@ -3,6 +3,7 @@ import math
 import csv
 import os
 import sys
+import subprocess
 
 # Mevcut scripti içe aktarabilmek için yolu ekleyelim
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -33,8 +34,70 @@ def export_all_road_network_to_csv(output_path):
         writer.writeheader()
         writer.writerows(all_waypoints)
         
-    print(f"Başarıyla {len(all_waypoints)} waypoint oluşturuldu. Kaydedilen yer: {output_path}")
+    print(f"✓ {len(all_waypoints)} waypoint oluşturuldu")
+    print(f"✓ Kaydedilen yer: {output_path}\n")
+    
+    return output_path
+
+def calculate_waypoint_yaws(csv_path):
+    """
+    Waypoints CSV dosyasındaki yaw değerlerini atan2(Δy, Δx) ile hesapla
+    """
+    print("Yaw değerleri hesaplanıyor (atan2 formülü)...")
+    
+    # Workspace root'u bul
+    # generate_full_map.py: /home/ranim/autoCar_ws/src/path_planning/scripts/generate_full_map.py
+    # Workspace: /home/ranim/autoCar_ws
+    script_path = os.path.abspath(__file__)
+    workspace_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(script_path))))
+    yaw_script = os.path.join(workspace_root, 'scripts', 'update_waypoints_yaw.py')
+    
+    if not os.path.exists(yaw_script):
+        print(f"✗ Hata: Yaw hesaplama scripti bulunamadı: {yaw_script}")
+        return False
+    
+    try:
+        result = subprocess.run(
+            ['python3', yaw_script, csv_path],
+            check=False,
+            capture_output=True,
+            text=True
+        )
+        
+        # Çıktısı göster
+        if result.stdout:
+            print(result.stdout)
+        
+        if result.returncode != 0:
+            print(f"✗ Hata: Yaw hesaplaması başarısız (exit code: {result.returncode})")
+            if result.stderr:
+                print(f"Hata detayı:\n{result.stderr}")
+            return False
+        
+        print("✓ Yaw değerleri otomatik olarak hesaplandı\n")
+        return True
+        
+    except Exception as e:
+        print(f"✗ Exception: {e}")
+        return False
 
 if __name__ == "__main__":
     output = "/home/ranim/autoCar_ws/waypoints/full_road_map.csv"
-    export_all_road_network_to_csv(output)
+    
+    print("=" * 60)
+    print("  YOL HARITASI OLUŞTURUCU")
+    print("  + Otomatik Yaw Hesaplaması")
+    print("=" * 60)
+    print()
+    
+    # 1. Waypoints oluştur
+    print("[1/2] Waypoints oluşturuluyor...")
+    csv_file = export_all_road_network_to_csv(output)
+    
+    # 2. Yaw değerlerini hesapla
+    print("[2/2] Yaw değerleri hesaplanıyor...")
+    calculate_waypoint_yaws(csv_file)
+    
+    print("=" * 60)
+    print("✓ TAMAMLANDI!")
+    print("=" * 60)
