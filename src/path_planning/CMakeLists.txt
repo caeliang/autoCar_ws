@@ -23,37 +23,34 @@ find_package(perception REQUIRED)
 include_directories(include)
 
 add_library(waypoint_utils
-  src/waypoint_utils.cpp
-  src/waypoint_io.cpp
-  src/waypoint_visualizer.cpp
+  src/core/waypoint_utils.cpp
+  src/core/waypoint_io.cpp
+  src/core/waypoint_visualizer.cpp
 )
 ament_target_dependencies(waypoint_utils rclcpp visualization_msgs geometry_msgs)
 
-add_executable(waypoint_tracker src/waypoint_tracker.cpp)
+add_executable(waypoint_tracker src/nodes/waypoint_tracker.cpp)
 target_link_libraries(waypoint_tracker waypoint_utils)
 ament_target_dependencies(waypoint_tracker rclcpp nav_msgs geometry_msgs std_msgs)
 
-add_executable(car_index_finder src/car_index_finder.cpp)
+add_executable(car_index_finder src/nodes/car_index_finder.cpp)
 ament_target_dependencies(car_index_finder rclcpp geometry_msgs)
 
-add_executable(waypoint_manager src/waypoint_manager_node.cpp)
+add_executable(waypoint_manager src/nodes/waypoint_manager_node.cpp)
 target_link_libraries(waypoint_manager waypoint_utils)
 ament_target_dependencies(waypoint_manager rclcpp geometry_msgs nav_msgs std_msgs std_srvs)
 
-add_executable(pure_pursuit src/pure_pursuit_node.cpp)
+add_executable(pure_pursuit src/nodes/pure_pursuit_node.cpp)
 ament_target_dependencies(pure_pursuit rclcpp nav_msgs geometry_msgs visualization_msgs)
 
-add_executable(lane_path_follower src/lane_path_follower.cpp)
+add_executable(lane_path_follower src/nodes/lane_path_follower.cpp)
 ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs visualization_msgs)
-
-# add_executable(waypoint_lane_fusion src/waypoint_lane_fusion_node.cpp)
-# ament_target_dependencies(waypoint_lane_fusion rclcpp geometry_msgs nav_msgs)
 
 # a_star_planner is only used as a library, not a standalone executable
 # add_executable(a_star_planner src/a_star_planner.cpp)
 # ament_target_dependencies(a_star_planner rclcpp)
 
-add_executable(path_planning_main src/path_planning_main.cpp)
+add_executable(path_planning_main src/algorithms/path_planning_main.cpp)
 ament_target_dependencies(path_planning_main rclcpp geometry_msgs nav_msgs)
 
 install(TARGETS
@@ -75,11 +72,12 @@ install(DIRECTORY launch config
 )
 
 install(PROGRAMS
-  scripts/waypoint_recorder.py
-  scripts/waypoint_visualizer.py
-  scripts/road_network.py
-  scripts/generate_full_map.py
-  scripts/generate_route.py
+  scripts/visualization/waypoint_recorder.py
+  scripts/visualization/waypoint_visualizer.py
+  scripts/path_planning/road_network.py
+  scripts/path_planning/generate_full_map.py
+  scripts/path_planning/generate_route.py
+  scripts/test_nearest_waypoint.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

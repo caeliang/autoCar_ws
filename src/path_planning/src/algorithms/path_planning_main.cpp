@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
     cout << "[2/4] A* algoritması ile rota hesaplanıyor..." << endl;
     auto step2_start = chrono::high_resolution_clock::now();
     
-    string cmd = "python3 /home/ranim/autoCar_ws/src/path_planning/scripts/generate_route.py " + 
+    string cmd = "python3 /home/ranim/autoCar_ws/src/path_planning/scripts/path_planning/generate_route.py " + 
                  to_string(goal_x) + " " + to_string(goal_y) + " >/dev/null 2>&1";
     int result = system(cmd.c_str());
     
