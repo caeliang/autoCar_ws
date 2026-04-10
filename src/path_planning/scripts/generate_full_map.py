@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+--------------------------------------------------------------------------------
+Brief: Rota Haritası Üreticisi (Road Map Generator)
+Description: 
+  'road_network.py' içinde tanımlanan asfalt yol ve kavşak geometrisini (`RoadNetwork`) 
+  okuyarak haritadaki tüm sürülebilir yolları (~1m aralıklarla waypoint olarak) oluşturur.
+  Bu waypoint'lere 'update_waypoints_yaw.py' yardımıyla atan2 yönelim değerlerini ekler
+  ve çıktı olarak 'waypoints/full_road_map.csv' dosyasını yaratır.
+Kullanıldığı Yer: `./scripts/generate_route.sh` pipeline'ı.
+--------------------------------------------------------------------------------
+"""
 import math
 import csv
 import os

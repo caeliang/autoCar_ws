@@ -16,7 +16,7 @@ set -e
 
 WS=~/autoCar_ws
 GENERATE_SCRIPT="$WS/src/path_planning/scripts/generate_full_map.py"
-VISUALIZE_SCRIPT="$WS/scripts/visualize_waypoints_yaw.py"
+VISUALIZE_SCRIPT="$WS/scripts/plot_waypoints.py"
 WAYPOINTS_FILE="$WS/waypoints/full_road_map.csv"
 GRID_FILE="$WS/matrices/road_grid_4wide.txt"
 
@@ -38,8 +38,8 @@ python3 "$GENERATE_SCRIPT"
 if [ -f "$VISUALIZE_SCRIPT" ] && [ -f "$WAYPOINTS_FILE" ]; then
     echo "[2/2] Görselleştirme oluşturuluyor (tüm waypoints)..."
     if [ -f "$GRID_FILE" ]; then
-        OUTPUT_VIZ="$WS/waypoints/waypoints_all_points.png"
-        timeout 30 python3 "$VISUALIZE_SCRIPT" "$WAYPOINTS_FILE" "$GRID_FILE" "$OUTPUT_VIZ" 1 2>/dev/null || true
+        OUTPUT_VIZ="$WS/waypoints/full_road_map.png"
+        timeout 30 python3 "$VISUALIZE_SCRIPT" "$WAYPOINTS_FILE" --grid "$GRID_FILE" 2>/dev/null || true
         echo "✓ Görselleştirme: $OUTPUT_VIZ"
     else
         echo "⚠ Grid dosyası bulunamadı, görselleştirme atlanıyor"
@@ -52,4 +52,4 @@ echo "✓ TAMAMLANDI!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo
 echo "Waypoints dosyası: $WAYPOINTS_FILE"
-[ -f "$WS/waypoints/waypoints_all_points.png" ] && echo "Görselleştirme: $WS/waypoints/waypoints_all_points.png"
+[ -f "$WS/waypoints/full_road_map.png" ] && echo "Görselleştirme: $WS/waypoints/full_road_map.png"
