@@ -49,13 +49,12 @@ ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs visua
 # add_executable(waypoint_lane_fusion src/waypoint_lane_fusion_node.cpp)
 # ament_target_dependencies(waypoint_lane_fusion rclcpp geometry_msgs nav_msgs)
 
-add_executable(a_star_planner src/a_star_planner.cpp)
-ament_target_dependencies(a_star_planner rclcpp)
+# a_star_planner is only used as a library, not a standalone executable
+# add_executable(a_star_planner src/a_star_planner.cpp)
+# ament_target_dependencies(a_star_planner rclcpp)
 
-# add_executable(path_planning_main src/path_planning_main.cpp)
-# ament_target_dependencies(path_planning_main rclcpp)
-
-# rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+add_executable(path_planning_main src/path_planning_main.cpp)
+ament_target_dependencies(path_planning_main rclcpp geometry_msgs nav_msgs)
 
 install(TARGETS
   waypoint_tracker
@@ -63,7 +62,7 @@ install(TARGETS
   waypoint_manager
   pure_pursuit
   lane_path_follower
-  a_star_planner
+  path_planning_main
   DESTINATION lib/${PROJECT_NAME}
 )
 

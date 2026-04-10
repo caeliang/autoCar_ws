@@ -1,149 +1,155 @@
 #include <iostream>
 #include <vector>
-#include <queue>
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <algorithm>
 #include <iomanip>
 #include <chrono>
 #include <string>
-#include "direction_calculator.h"
-#include "waypoint_finder.h"
-#include "jps_planner.h"
+#include <thread>
+#include <atomic>
+#include <cstdlib>
+#include <rclcpp/rclcpp.hpp>
+#include <geometry_msgs/msg/point.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 
 using namespace std;
 
-// JPS Algoritması Node yapısı
-// (jps_planner.h'dan import ediliyor)
+// Global variables to store received data
+atomic<bool> received_waypoint(false);
+atomic<bool> received_grid_index(false);
+geometry_msgs::msg::Point latest_waypoint;
+geometry_msgs::msg::Point latest_grid_index;
 
-// JPS Algoritması kullanacak (A* yerine)
+/**
+ * ROS Node to listen to waypoint_tracker and car_index_finder outputs
+ */
+class PathPlanningMainNode : public rclcpp::Node {
+public:
+    PathPlanningMainNode() : Node("path_planning_main_node") {
+        // Subscribe to waypoint tracker output
+        wp_sub_ = this->create_subscription<geometry_msgs::msg::Point>(
+            "/prius/nearest_waypoint", 10,
+            [this](const geometry_msgs::msg::Point::SharedPtr msg) {
+                latest_waypoint = *msg;
+                received_waypoint = true;
+            }
+        );
+        
+        // Subscribe to car index finder output
+        grid_sub_ = this->create_subscription<geometry_msgs::msg::Point>(
+            "/prius/car_matrix_index", 10,
+            [this](const geometry_msgs::msg::Point::SharedPtr msg) {
+                latest_grid_index = *msg;
+                received_grid_index = true;
+            }
+        );
+        
+        RCLCPP_INFO(this->get_logger(), "Path Planning Main Node initialized. Waiting for tracker and finder...");
+    }
+
+private:
+    rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr wp_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr grid_sub_;
+};
 
 int main(int argc, char** argv) {
-    if (argc < 5) {
-        cout << "Kullanim: path_planning_main <grid_txt> <waypoint_csv> <arac_x> <arac_y> [hedef_x] [hedef_y]" << endl;
-        cout << "Ornek: path_planning_main matrices/road_grid_4wide.txt waypoints/full_road_map.csv 5.5 10.2 50.0 20.0" << endl;
+    if (argc < 2) {
+        cout << "Kullanim: path_planning_main <hedef_grid_x> <hedef_grid_y>" << endl;
+        cout << "Ornek: path_planning_main 45 55" << endl;
         return 1;
     }
 
-    string grid_file = argv[1];
-    string waypoint_file = argv[2];
-    double vehicle_x = stod(argv[3]);
-    double vehicle_y = stod(argv[4]);
-
-    double target_x, target_y;
-    if (argc >= 7) {
-        target_x = stod(argv[5]);
-        target_y = stod(argv[6]);
-    } else {
-        // Varsayilan hedef
-        target_x = 50.0;
-        target_y = 20.0;
-    }
+    int goal_x = stoi(argv[1]);
+    int goal_y = stoi(argv[2]);
 
     cout << "\n========================================" << endl;
-    cout << "     PATH PLANNING SISTEMI" << endl;
+    cout << "     PATH PLANNING (A* + ROS)" << endl;
     cout << "========================================\n" << endl;
 
     auto total_start = chrono::high_resolution_clock::now();
 
-    // 1. Waypoint Finder ile en yakin waypoint'i bul
-    cout << "[1/3] En yakin waypoint aranıyor..." << endl;
-    auto step1_start = chrono::high_resolution_clock::now();
+    // Step 1: Start tracker and finder processes
+    cout << "[1/4] ROS node'ları (tracker ve finder) arka planda başlatılıyor..." << endl;
     
-    WaypointFinder finder;
-    if (!finder.loadWaypoints(waypoint_file)) {
-        return -1;
-    }
+    rclcpp::init(argc, argv);
+    auto main_node = make_shared<PathPlanningMainNode>();
+    
+    // Start waypoint tracker in background
+    system("ros2 run path_planning waypoint_tracker &");
+    
+    // Start car index finder in background
+    system("ros2 run path_planning car_index_finder &");
+    
+    this_thread::sleep_for(chrono::milliseconds(1000)); // Give them time to start
+    cout << "✓ Node'lar başlatıldı\n" << endl;
 
-    auto waypoint_result = finder.findNearestWaypoint(vehicle_x, vehicle_y);
-    cout << "  Arac Konumu: (" << vehicle_x << ", " << vehicle_y << ")" << endl;
-    cout << "  En Yakin Waypoint: [" << waypoint_result.waypoint.index << "]" << endl;
-    cout << "  Waypoint Koordinati: (" << fixed << setprecision(3) 
-         << waypoint_result.waypoint.x << ", " << waypoint_result.waypoint.y << ")" << endl;
-    cout << "  Uzaklik: " << waypoint_result.distance << " birim" << endl;
-
-    auto step1_end = chrono::high_resolution_clock::now();
-    auto step1_duration = chrono::duration_cast<chrono::milliseconds>(step1_end - step1_start);
-    cout << "  SURE: " << step1_duration.count() << " ms\n" << endl;
-
-    // 2. JPS ile path hesapla
-    cout << "[2/3] Jump Point Search algoritması ile rota hesaplanıyor..." << endl;
+    // Step 2: Generate route using A* algorithm (via generate_route.py)
+    cout << "[2/4] A* algoritması ile rota hesaplanıyor..." << endl;
     auto step2_start = chrono::high_resolution_clock::now();
     
-    JPSPlanner planner;
-    if (!planner.loadMap(grid_file)) {
+    string cmd = "python3 /home/ranim/autoCar_ws/src/path_planning/scripts/generate_route.py " + 
+                 to_string(goal_x) + " " + to_string(goal_y) + " >/dev/null 2>&1";
+    int result = system(cmd.c_str());
+    
+    if (result != 0) {
+        cout << "✗ Rota hesaplaması başarısız!" << endl;
         return -1;
     }
-
-    Point start = {waypoint_result.grid_x, waypoint_result.grid_y};
-    Point goal = {(int)(target_x), (int)(target_y)};
-
-    cout << "  Baslangic Grid: (" << start.x << ", " << start.y << ")" << endl;
-    cout << "  Hedef Grid: (" << goal.x << ", " << goal.y << ")" << endl;
-
-    auto path = planner.findPath(start, goal);
-
-    if (path.empty()) {
-        cout << "  Hata: Path bulunamadi!" << endl;
-        return -1;
-    }
-
-    cout << "  Rota bulundu! " << path.size() << " nokta." << endl;
+    cout << "✓ Rota oluşturuldu: planned_route.csv\n" << endl;
 
     auto step2_end = chrono::high_resolution_clock::now();
     auto step2_duration = chrono::duration_cast<chrono::milliseconds>(step2_end - step2_start);
-    cout << "  SURE: " << step2_duration.count() << " ms\n" << endl;
 
-    // 3. Yön listesini hesapla
-    cout << "[3/3] Yön listesi oluşturuluyor..." << endl;
+    // Step 3: Wait for waypoint tracker and car index finder to provide data
+    cout << "[3/4] Aracın o anki konumu ve matris indeksi alınıyor..." << endl;
     auto step3_start = chrono::high_resolution_clock::now();
     
-    auto directions = DirectionCalculator::getDirectionsFromPath(path);
-    auto direction_strings = DirectionCalculator::directionsToStrings(directions);
-
+    int max_wait = 30; // seconds
+    int waited = 0;
+    
+    while (!received_waypoint.load() || !received_grid_index.load()) {
+        rclcpp::spin_some(main_node);
+        this_thread::sleep_for(chrono::milliseconds(100));
+        waited += 100;
+        
+        if (waited > max_wait) {
+            cout << "✗ Zaman aşımı! Tracker veya finder veri göndermiyor." << endl;
+            return -1;
+        }
+    }
+    
     auto step3_end = chrono::high_resolution_clock::now();
     auto step3_duration = chrono::duration_cast<chrono::milliseconds>(step3_end - step3_start);
-    cout << "  SURE: " << step3_duration.count() << " ms\n" << endl;
+    
+    cout << "✓ Veriler alındı\n" << endl;
+
+    // Step 4: Display results
+    cout << "[4/4] Sonuçlar gösteriliyor..." << endl << endl;
+
+    cout << "========================================" << endl;
+    cout << "     ROTA PLANLAMA SONUCU" << endl;
+    cout << "========================================\n" << endl;
+
+    cout << "Hedef Matris İndeksi: [X: " << goal_x << ", Y: " << goal_y << "]" << endl << endl;
+
+    cout << "Araç O Anki Durumu:" << endl;
+    cout << "  Dünya Koordinatları: (" << fixed << setprecision(2) 
+         << latest_waypoint.x << ", " << latest_waypoint.y << ")" << endl;
+    cout << "  Matris İndeksi: [X: " << (int)latest_grid_index.x 
+         << ", Y: " << (int)latest_grid_index.y << "]" << endl << endl;
+
+    cout << "Rota Bilgisi:" << endl;
+    cout << "  A* Planlama Süresi: " << step2_duration.count() << " ms" << endl;
+    cout << "  Konum Algılama Süresi: " << step3_duration.count() << " ms" << endl << endl;
 
     auto total_end = chrono::high_resolution_clock::now();
     auto total_duration = chrono::duration_cast<chrono::milliseconds>(total_end - total_start);
 
-    // Çıktıyı göster
     cout << "========================================" << endl;
-    cout << "     ROTA DETAYLARI" << endl;
+    cout << "TOPLAM IŞLEM SÜRESİ: " << total_duration.count() << " ms" << endl;
     cout << "========================================\n" << endl;
 
-    cout << "Tamamlanacak Adim Sayisi: " << path.size() << endl;
-    cout << "Yon Degisikligi Sayisi: " << direction_strings.size() << endl;
-
-    cout << "\n--- ROTANıN DETAYLARI ---\n";
-    cout << "Baslangic: Grid[" << path[0].y << "][" << path[0].x << "] (" 
-         << path[0].x << ", " << path[0].y << ")" << endl;
-
-    for (size_t i = 0; i < direction_strings.size(); ++i) {
-        cout << "Adim " << (i+1) << ": " << direction_strings[i] 
-             << " -> Grid[" << path[i+1].y << "][" << path[i+1].x 
-             << "] (" << path[i+1].x << ", " << path[i+1].y << ")" << endl;
-    }
-
-    cout << "\n--- YON LİSTESİ ---\n";
-    cout << "[";
-    for (size_t i = 0; i < direction_strings.size(); ++i) {
-        cout << direction_strings[i];
-        if (i < direction_strings.size() - 1) cout << ", ";
-    }
-    cout << "]\n" << endl;
-
-    cout << "========================================" << endl;
-    cout << "     ROTA HAZIR" << endl;
-    cout << "========================================\n" << endl;
-
-    cout << "TOPLAM SURE: " << total_duration.count() << " ms" << endl;
-    cout << "  Adim 1 (Waypoint): " << step1_duration.count() << " ms" << endl;
-    cout << "  Adim 2 (JPS Path):  " << step2_duration.count() << " ms" << endl;
-    cout << "  Adim 3 (Yonler):   " << step3_duration.count() << " ms" << endl;
-    cout << "\n========================================\n" << endl;
-
+    rclcpp::shutdown();
     return 0;
 }
