@@ -20,7 +20,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace path_planning {
+namespace control {
 
 static double normalize_angle(double a) {
     while (a >  M_PI) a -= 2.0 * M_PI;
@@ -40,6 +40,10 @@ public:
         declare_parameter<double>("max_lookahead", 5.0);
         declare_parameter<double>("lookahead_ratio", 1.5);
         declare_parameter<double>("max_omega", 1.0);
+
+        // Yeni global parametreler
+        declare_parameter<bool>("global_brake", false);
+        declare_parameter<double>("global_speed", get_parameter("max_speed").as_double());
 
         max_speed_ = get_parameter("max_speed").as_double();
         min_speed_ = get_parameter("min_speed").as_double();
@@ -110,145 +114,101 @@ public:
 
 private:
     // ═══════════════════════════════════════════════════════════════
-    //  ANA KONTROL DÖNGÜSÜ  (20 Hz)
+    //  ANA KONTROL DÖNGÜSÜ  (Basit Nokta Takibi - A* / Keyboard Mantığı)
     // ═══════════════════════════════════════════════════════════════
     void control_loop()
     {
-        geometry_msgs::msg::Twist cmd;  // hepsi 0
+        geometry_msgs::msg::Twist cmd;  // Varsayılan: Hepsi 0 (DUR)
 
         if (!pose_ok_ || !odom_ok_ || !path_ok_ || finished_) {
             cmd_pub_->publish(cmd);
             return;
         }
 
-        // 1) Path üzerinde en yakın noktayı bul
-        int nearest = find_nearest_on_path();
-        if (nearest < 0) {
-            cmd_pub_->publish(cmd);
-            return;
-        }
-
-        // 2) Path yönü (nearest noktasındaki teğet)
-        double path_yaw = get_path_yaw(nearest);
-        double heading_err = normalize_angle(car_yaw_ - path_yaw);
-
-        // 3) Dinamik lookahead (hıza orantılı)
-        double la = std::clamp(car_speed_ * la_ratio_, min_la_, max_la_);
-
-        // 4) Path boyunca lookahead noktası bul
-        double la_x, la_y;
-        if (!find_lookahead_point(nearest, la, la_x, la_y)) {
-            la_x = path_.poses.back().pose.position.x;
-            la_y = path_.poses.back().pose.position.y;
-        }
-
-        // 5) Araç koordinat sistemine dönüştür
-        double dx = la_x - car_x_;
-        double dy = la_y - car_y_;
-        double local_y = -dx * std::sin(car_yaw_) + dy * std::cos(car_yaw_);
-        double alpha = std::atan2(local_y,
-                        dx * std::cos(car_yaw_) + dy * std::sin(car_yaw_));
-
-        // ═══════════════════════════════════════════════════════════
-        //  KONTROL STRATEJİSİ
-        //
-        //  ★ KURAL: Heading error küçükse → ASLA DURMA.
-        //    Araç yoldan yana kaymışsa alpha>90° olabilir ama
-        //    heading doğruysa ileri gidip yola dönmesi lazım.
-        //    Dur-dön sadece heading gerçekten yanlışsa yapılır.
-        // ═══════════════════════════════════════════════════════════
-
-        double speed = 0.0;
-        double omega = 0.0;
-
-        double abs_heading = std::abs(heading_err);
-
-        if (abs_heading > 1.05) {
-            // ★ Heading çok yanlış (>60°) → DUR ve DÖN
-            speed = 0.0;
-            omega = (heading_err > 0 ? -1.0 : 1.0) * max_omega_;
-        }
-        else if (abs_heading > 0.52) {
-            // Heading kısmen yanlış (30°-60°) → YAVAŞ + AGRESIF DÖNÜŞ
-            speed = min_speed_;
-            omega = -1.5 * heading_err;
-            omega = std::clamp(omega, -max_omega_, max_omega_);
-        }
-        else {
-            // ── Heading iyi (<30°) → HER ZAMAN İLERİ GİT ───────────
-            //    Alpha ne olursa olsun dur, pure pursuit + heading
-            //    düzeltme ile yola geri dön.
-
-            // Lookahead hedefi: path yönünde, araçtan ileride bir nokta
-            // (lateral offset varsa nearest yerine ileri projeksiyonu al)
-            double target_x, target_y;
-
-            if (std::abs(alpha) > M_PI / 2.0) {
-                // Lookahead arkada → path yönünde la metre ileriye hedefle
-                target_x = car_x_ + la * std::cos(path_yaw);
-                target_y = car_y_ + la * std::sin(path_yaw);
-            } else {
-                target_x = la_x;
-                target_y = la_y;
+        // 1) Hedef noktayı seç (manager bize local yolu veriyor, ilk elemanlarımız sıradaki waypointlerimiz)
+        // Araca en az 1.5 - 2.0 metre uzaklıktaki ilk waypointi hedef alıyoruz ki yalpalama yapmasın
+        double target_x = car_x_;
+        double target_y = car_y_;
+        bool target_found = false;
+        
+        for (const auto& pose_stamped : path_.poses) {
+            double tx = pose_stamped.pose.position.x;
+            double ty = pose_stamped.pose.position.y;
+            double dist = std::sqrt(std::pow(tx - car_x_, 2) + std::pow(ty - car_y_, 2));
+            
+            // Eğer nokta 1.0 metreden uzaksa onu hedef olarak al
+            if (dist > min_la_) {
+                target_x = tx;
+                target_y = ty;
+                target_found = true;
+                break;
             }
-
-            double tdx = target_x - car_x_;
-            double tdy = target_y - car_y_;
-            double t_local_y = -tdx * std::sin(car_yaw_)
-                              + tdy * std::cos(car_yaw_);
-            double t_dist = std::sqrt(tdx * tdx + tdy * tdy);
-
-            double curvature = (t_dist > 0.01)
-                ? 2.0 * t_local_y / (t_dist * t_dist)
-                : 0.0;
-
-            speed = max_speed_;
-
-            // Lateral offset büyükse biraz yavaşla
-            double nearest_dx = path_.poses[nearest].pose.position.x - car_x_;
-            double nearest_dy = path_.poses[nearest].pose.position.y - car_y_;
-            double lateral_dist = std::sqrt(nearest_dx * nearest_dx +
-                                            nearest_dy * nearest_dy);
-            if (lateral_dist > 3.0) {
-                speed *= 0.5;
-            } else if (lateral_dist > 1.5) {
-                speed *= 0.7;
-            }
-
-            // Path sonuna yakınsa yavaşla
-            double remaining = calc_remaining_length(nearest);
-            if (remaining < 4.0) {
-                speed *= std::max(0.3, remaining / 4.0);
-            }
-
-            speed = std::max(speed, min_speed_);
-
-            // Pure pursuit curvature + heading error düzeltme
-            omega = speed * curvature - 0.8 * heading_err;
-            omega = std::clamp(omega, -max_omega_, max_omega_);
+        }
+        
+        // Eğer hepsi 1.0 metreden yakınsa, sıradaki son noktayı hedefleriz
+        if (!target_found && !path_.poses.empty()) {
+            target_x = path_.poses.back().pose.position.x;
+            target_y = path_.poses.back().pose.position.y;
+        }
+        
+        // 2) Hedef açıyı hesapla (Robot → Target)
+        double dx = target_x - car_x_;
+        double dy = target_y - car_y_;
+        double target_yaw = std::atan2(dy, dx);
+        
+        // 3) Mevcut açı ile aradaki açı farkı = dönüş komutu (alpha)
+        double alpha = normalize_angle(target_yaw - car_yaw_);
+        
+        // 4) Komutları Üret (Keyboard mantığının otomatik hali)
+        double k_angular = 1.5;   // Dönüş katsayısı (ne kadar sert dönsün)
+        
+        // Global parametreleri anlık olarak oku
+        bool is_braking = get_parameter("global_brake").as_bool();
+        double current_global_speed = get_parameter("global_speed").as_double();
+        
+        // Araç fren yapıyorsa ya da rota bitmişse hızı 0 yap
+        if (is_braking || finished_) {
+            current_global_speed = 0.0;
         }
 
-        // ── cmd_vel gönder ──────────────────────────────────────────
-        // ★ Prius: ileri = linear.y negatif (burun = −Y body)
+        double speed = current_global_speed; // Varsayılan: global hız seviyesi
+        
+        // Eğer açı farkı çok yüksekse (örn: 45 dereceden fazla), hızı düşür ve sert dön,
+        // ancak sadece eğer bir hız varsa yap (fren varsa zaten 0)
+        if (speed > 0.0) {
+            if (std::abs(alpha) > 0.8) {
+                speed = std::min(speed, min_speed_); // Köşelerde yavaşla
+            } else if (std::abs(alpha) > 0.4) {
+                speed = std::min(speed, current_global_speed * 0.6); // Sert dönüşte yavaşla
+            }
+        }
+
+        // Açıyı orantısal katsayı ile z ye bas
+        double angular_z = k_angular * alpha;
+        
+        // Dönüşü limitle
+        angular_z = std::clamp(angular_z, -max_omega_, max_omega_);
+        
+        // Prius aracı modeli için KRİTİK: İleri yön Y ekseninde negatiftir (cmd.linear.y = -hız)
         cmd.linear.x = 0.0;
-        cmd.linear.y = -speed;  // negatif: -Y yönünde = ileri
-        cmd.angular.z = omega;
+        cmd.linear.y = -speed;
+        cmd.angular.z = angular_z;
+        
         cmd_pub_->publish(cmd);
 
-        publish_marker(la_x, la_y);
+        // Hedeflenen noktayı RVIZ için çizdir
+        publish_marker(target_x, target_y);
 
         // ── Debug ───────────────────────────────────────────────────
         tick_++;
-        if (tick_ % 60 == 0) {
+        if (tick_ % 20 == 0) {
             RCLCPP_INFO(get_logger(),
-                "Pos(%.1f,%.1f) yaw=%.0f° path_yaw=%.0f° "
-                "h_err=%.0f° alpha=%.0f° v=%.2f w=%.2f",
-                car_x_, car_y_,
+                "[Basit Takip] Pos(%.1f, %.1f) | Hedef(%.1f, %.1f) | car_yaw: %.0f° target_yaw: %.0f° | alpha: %.0f° | v: %.1f, w: %.2f",
+                car_x_, car_y_, target_x, target_y,
                 car_yaw_ * 180.0 / M_PI,
-                path_yaw * 180.0 / M_PI,
-                heading_err * 180.0 / M_PI,
+                target_yaw * 180.0 / M_PI,
                 alpha * 180.0 / M_PI,
-                speed, omega);
+                speed, angular_z);
         }
     }
 
@@ -366,11 +326,11 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 };
 
-}  // namespace path_planning
+}  // namespace control
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<path_planning::PurePursuitNode>());
+    rclcpp::spin(std::make_shared<control::PurePursuitNode>());
     rclcpp::shutdown();
     return 0;
 }

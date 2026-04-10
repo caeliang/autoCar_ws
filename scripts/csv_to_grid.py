@@ -2,6 +2,7 @@ import csv
 import math
 import os
 import numpy as np
+import cv2
 
 def generate_grid_from_csv(input_csv, output_txt, output_npy=None, resolution=1.0, width_mode='thin'):
     points = []
@@ -13,38 +14,16 @@ def generate_grid_from_csv(input_csv, output_txt, output_npy=None, resolution=1.
     if not points:
         return
         
-    min_x = min(p[0] for p in points)
-    max_x = max(p[0] for p in points)
-    min_y = min(p[1] for p in points)
-    max_y = max(p[1] for p in points)
+    # generate_route.py icindeki grid haritasiyla tam uyumlu olmasi icin fixed boyutlar
+    min_x, max_x = -28.8 * 1.5, 28.8 * 1.5
+    min_y, max_y = -32.5 * 1.5, 33.8 * 1.5
     
     width = int(math.ceil((max_x - min_x) / resolution)) + 1
     height = int(math.ceil((max_y - min_y) / resolution)) + 1
     
-    grid = [[0 for _ in range(width)] for _ in range(height)]
+    grid = np.zeros((height, width), dtype=np.uint8)
     
-    def draw_line(x0, y0, x1, y1):
-        x0, y0 = int(x0), int(y0)
-        x1, y1 = int(x1), int(y1)
-        dx = abs(x1 - x0)
-        dy = abs(y1 - y0)
-        sx = 1 if x0 < x1 else -1
-        sy = 1 if y0 < y1 else -1
-        err = dx - dy
-        while True:
-            if 0 <= x0 < width and 0 <= y0 < height:
-                grid[y0][x0] = 1
-            if x0 == x1 and y0 == y1:
-                break
-            e2 = 2 * err
-            if e2 > -dy:
-                err -= dy
-                x0 += sx
-            if e2 < dx:
-                err += dx
-                y0 += sy
-
-    # Ardışık waypointlerin mesafesi thresholddan küçükse birleştir
+    # Ardisik waypointlerin mesafesi threshold'dan kucukse birlestir
     threshold = 8.0 
     
     for i in range(len(points)):
@@ -53,7 +32,9 @@ def generate_grid_from_csv(input_csv, output_txt, output_npy=None, resolution=1.
         gy = int(round((py - min_y) / resolution))
         gx = max(0, min(gx, width - 1))
         gy = max(0, min(gy, height - 1))
-        grid[gy][gx] = 1
+        # Points only, no line yet
+        if i == 0:
+            grid[gy, gx] = 1
         
         if i > 0:
             ppx, ppy = points[i-1]
@@ -63,40 +44,29 @@ def generate_grid_from_csv(input_csv, output_txt, output_npy=None, resolution=1.
                 pgy = int(round((ppy - min_y) / resolution))
                 pgx = max(0, min(pgx, width - 1))
                 pgy = max(0, min(pgy, height - 1))
-                draw_line(pgx, pgy, gx, gy)
+                # Opencv line cizici Bresenham kullaniyor
+                cv2.line(grid, (pgx, pgy), (gx, gy), 1, 1)
 
-    temp_grid = [row[:] for row in grid]
-    for y in range(height):
-        for x in range(width):
-            if temp_grid[y][x] == 1:
-                if width_mode == 'thin':
-                    if y+1 < height and x+1 < width and temp_grid[y+1][x+1] == 1 and temp_grid[y][x+1] == 0 and temp_grid[y+1][x] == 0:
-                        grid[y][x+1] = 1
-                    if y-1 >= 0 and x+1 < width and temp_grid[y-1][x+1] == 1 and temp_grid[y][x+1] == 0 and temp_grid[y-1][x] == 0:
-                        grid[y][x+1] = 1
-                elif width_mode == '4-wide':
-                    # Sag ve asagi dogru 2x2 genisletme yaparak yolun genisligini tam 4 birim yapiyoruz. 
-                    # Cunku -1 ve +1'de noktalar var. (-1, 0) ve (1, 2) olusturarak -1,0,1,2 genisligini tam 4 piksele tamamlar.
-                    for dy, dx in [(0,0), (0,1), (1,0), (1,1)]:
-                        ny, nx = y + dy, x + dx
-                        if 0 <= ny < height and 0 <= nx < width:
-                             grid[ny][nx] = 1
+    if width_mode == '4-wide':
+        # OpenCV Dilation (Genisletme) ile kusursuz kalinlik elde et
+        # Seritler arasi boslugu kapatmak ve tam 4 piksel yol saglamak icin karesel 4x4 kernel
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4, 4))
+        grid = cv2.dilate(grid, kernel, iterations=1)
 
     os.makedirs(os.path.dirname(output_txt), exist_ok=True)
     with open(output_txt, 'w') as f:
-        for row in reversed(grid):
+        # Orijinal matris duzeninde satirlari ters cevir
+        for row in reversed(grid.tolist()):
             line = "".join(str(cell) for cell in row)
             f.write(line + "\n")
             
     if output_npy:
         os.makedirs(os.path.dirname(output_npy), exist_ok=True)
-        np_grid = np.array(grid)
-        np.save(output_npy, np.flipud(np_grid))
+        np.save(output_npy, np.flipud(grid))
             
-    print(f"Izgara Matrisi ({width_mode}) (Boyutlar: {width}x{height}, Çözünürlük: {resolution}m) oluşturuldu: {output_txt}")
+    print(f"Izgara Matrisi ({width_mode}) (Boyutlar: {width}x{height}, Cozunurluk: {resolution}m) olusturuldu: {output_txt}")
 
 if __name__ == '__main__':
-    # Onceki ince hali (ayri seritler)
-    generate_grid_from_csv("waypoints/full_road_map.csv", "matrices/road_grid.txt", "matrices/road_grid.npy", resolution=1.0, width_mode='thin')
-    # Yeni islenen tam 4 kalinlik (ortasi dolmus tek parca yol)
-    generate_grid_from_csv("waypoints/full_road_map.csv", "matrices/road_grid_4wide.txt", "matrices/road_grid_4wide.npy", resolution=1.0, width_mode='4-wide')
+    # Rota algoritmasi 68x59 matris bekliyor, bu sebeple resolution=1.5 olmak zorunda
+    generate_grid_from_csv("waypoints/full_road_map.csv", "matrices/road_grid.txt", "matrices/road_grid.npy", resolution=1.5, width_mode='thin')
+    generate_grid_from_csv("waypoints/full_road_map.csv", "matrices/road_grid_4wide.txt", "matrices/road_grid_4wide.npy", resolution=1.5, width_mode='4-wide')

@@ -6,7 +6,7 @@ waypoint_manager:
     waypoint_file: ""          # CSV dosya yolu
     frame_id: "map"
     goal_tolerance: 1.5        # m — waypoint'e ulaşıldı mesafesi
-    loop: true                 # true → döngü modu
+    loop: false                # hedefe ulaştığında dursun (döngü kapalı)
     publish_rate: 10.0         # Hz
     path_horizon: 50           # ilerideki kaç waypoint path'e dahil edilsin
 

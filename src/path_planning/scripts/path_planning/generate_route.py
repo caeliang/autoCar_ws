@@ -370,10 +370,14 @@ if __name__ == "__main__":
     waypoint_file = "/home/ranim/autoCar_ws/waypoints/full_road_map.csv"
     output_csv = "/home/ranim/autoCar_ws/waypoints/planned_route.csv"
     
-    # Parametreleri al (varsayılan değerler)
-    start_x = float(sys.argv[1]) if len(sys.argv) > 1 else 3
-    start_y = float(sys.argv[2]) if len(sys.argv) > 2 else 3
-    goal_x = float(sys.argv[3]) if len(sys.argv) > 3 else 45
-    goal_y = float(sys.argv[4]) if len(sys.argv) > 4 else 55
+    # Parametreleri dogrudan alalim
+    if len(sys.argv) < 5:
+        print("Eksik arguman")
+        sys.exit(1)
+        
+    start_x = float(sys.argv[1])
+    start_y = float(sys.argv[2])
+    goal_x = float(sys.argv[3])
+    goal_y = float(sys.argv[4])
     
     plan_route(grid_file, waypoint_file, start_x, start_y, goal_x, goal_y, output_csv)

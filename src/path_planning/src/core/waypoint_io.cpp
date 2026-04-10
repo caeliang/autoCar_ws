@@ -125,32 +125,62 @@ WaypointList loadWaypointsCSV(const std::string& filepath) {
 
     WaypointList waypoints;
     std::string line;
-    bool header_skipped = false;
+    
+    int x_idx = -1, y_idx = -1, yaw_idx = -1;
+    bool header_parsed = false;
 
     while (std::getline(ifs, line)) {
         std::string trimmed = trim(line);
         if (trimmed.empty() || trimmed[0] == '#') continue;
 
-        // İlk satır başlık (index,x,y,yaw)
-        if (!header_skipped) {
-            header_skipped = true;
+        std::vector<std::string> tokens;
+        std::istringstream ss(trimmed);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            tokens.push_back(trim(token));
+        }
+
+        if (!header_parsed) {
+            for (size_t i = 0; i < tokens.size(); ++i) {
+                if (tokens[i] == "x") x_idx = i;
+                else if (tokens[i] == "y") y_idx = i;
+                else if (tokens[i] == "yaw") yaw_idx = i;
+            }
+            if (x_idx == -1 || y_idx == -1) {
+                throw std::runtime_error("CSV file must contain at least 'x' and 'y' columns in the header.");
+            }
+            header_parsed = true;
             continue;
         }
 
-        // index,x,y,yaw
-        std::istringstream ss(trimmed);
-        std::string idx_s, x_s, y_s, yaw_s;
-
-        if (!std::getline(ss, idx_s, ',')) continue;
-        if (!std::getline(ss, x_s, ','))   continue;
-        if (!std::getline(ss, y_s, ','))   continue;
-        if (!std::getline(ss, yaw_s))      continue;
+        if (tokens.size() <= static_cast<size_t>(std::max(x_idx, y_idx))) continue;
 
         Waypoint wp;
-        wp.x   = std::stod(x_s);
-        wp.y   = std::stod(y_s);
-        wp.yaw = std::stod(yaw_s);
-        waypoints.push_back(wp);
+        try {
+            wp.x = std::stod(tokens[x_idx]);
+            wp.y = std::stod(tokens[y_idx]);
+            if (yaw_idx != -1 && tokens.size() > static_cast<size_t>(yaw_idx)) {
+                // The CSV files have yaw in degrees, so we convert it to radians.
+                wp.yaw = std::stod(tokens[yaw_idx]) * M_PI / 180.0;
+            } else {
+                wp.yaw = 0.0;
+            }
+            waypoints.push_back(wp);
+        } catch (...) {
+            // Ignore malformed rows
+        }
+    }
+
+    // Eğer yaw sütunu yoksa veya hepsi 0 ise, ardışık noktalardan yaw hesapla
+    if (yaw_idx == -1) {
+        for (size_t i = 0; i < waypoints.size() - 1; ++i) {
+            double dx = waypoints[i+1].x - waypoints[i].x;
+            double dy = waypoints[i+1].y - waypoints[i].y;
+            waypoints[i].yaw = std::atan2(dy, dx);
+        }
+        if (!waypoints.empty() && waypoints.size() > 1) {
+            waypoints.back().yaw = waypoints[waypoints.size() - 2].yaw;
+        }
     }
 
     return waypoints;

@@ -8,15 +8,28 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
+include_directories(include)
+
+# Lane controller executable
 add_executable(lane_controller
   src/lane_controller.cpp
   src/pid_controller.cpp
 )
 ament_target_dependencies(lane_controller rclcpp geometry_msgs)
 
-install(TARGETS lane_controller
+# Pure Pursuit node
+add_executable(pure_pursuit src/pure_pursuit_node.cpp)
+ament_target_dependencies(pure_pursuit rclcpp nav_msgs geometry_msgs visualization_msgs std_msgs)
+
+install(TARGETS lane_controller pure_pursuit
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 install(DIRECTORY launch

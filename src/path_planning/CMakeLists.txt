@@ -40,9 +40,6 @@ add_executable(waypoint_manager src/nodes/waypoint_manager_node.cpp)
 target_link_libraries(waypoint_manager waypoint_utils)
 ament_target_dependencies(waypoint_manager rclcpp geometry_msgs nav_msgs std_msgs std_srvs)
 
-add_executable(pure_pursuit src/nodes/pure_pursuit_node.cpp)
-ament_target_dependencies(pure_pursuit rclcpp nav_msgs geometry_msgs visualization_msgs)
-
 add_executable(lane_path_follower src/nodes/lane_path_follower.cpp)
 ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs visualization_msgs)
 
@@ -57,7 +54,6 @@ install(TARGETS
   waypoint_tracker
   car_index_finder
   waypoint_manager
-  pure_pursuit
   lane_path_follower
   path_planning_main
   DESTINATION lib/${PROJECT_NAME}
@@ -77,7 +73,6 @@ install(PROGRAMS
   scripts/path_planning/road_network.py
   scripts/path_planning/generate_full_map.py
   scripts/path_planning/generate_route.py
-  scripts/test_nearest_waypoint.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

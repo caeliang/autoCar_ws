@@ -29,12 +29,4 @@ def generate_launch_description():
         output='screen',
     )
 
-    pursuit = Node(
-        package='path_planning',
-        executable='pure_pursuit',
-        name='pure_pursuit',
-        parameters=[params],
-        output='screen',
-    )
-
-    return LaunchDescription([waypoint_file_arg, manager, follower, pursuit])
+    return LaunchDescription([waypoint_file_arg, manager, follower])
