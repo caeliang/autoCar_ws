@@ -15,18 +15,26 @@ find_package(std_srvs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(perception REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/DenseWaypoints.msg"
-  DEPENDENCIES geometry_msgs std_msgs
-)
+# rosidl_generate_interfaces(${PROJECT_NAME}
+#   "msg/DenseWaypoints.msg"
+#   DEPENDENCIES geometry_msgs std_msgs
+# )
 
 include_directories(include)
 
 add_library(waypoint_utils
+  src/waypoint_utils.cpp
   src/waypoint_io.cpp
   src/waypoint_visualizer.cpp
 )
 ament_target_dependencies(waypoint_utils rclcpp visualization_msgs geometry_msgs)
+
+add_executable(waypoint_tracker src/waypoint_tracker.cpp)
+target_link_libraries(waypoint_tracker waypoint_utils)
+ament_target_dependencies(waypoint_tracker rclcpp nav_msgs geometry_msgs std_msgs)
+
+add_executable(car_index_finder src/car_index_finder.cpp)
+ament_target_dependencies(car_index_finder rclcpp geometry_msgs)
 
 add_executable(waypoint_manager src/waypoint_manager_node.cpp)
 target_link_libraries(waypoint_manager waypoint_utils)
@@ -44,17 +52,18 @@ ament_target_dependencies(lane_path_follower rclcpp geometry_msgs nav_msgs visua
 add_executable(a_star_planner src/a_star_planner.cpp)
 ament_target_dependencies(a_star_planner rclcpp)
 
-add_executable(path_planning_main src/path_planning_main.cpp)
-ament_target_dependencies(path_planning_main rclcpp)
+# add_executable(path_planning_main src/path_planning_main.cpp)
+# ament_target_dependencies(path_planning_main rclcpp)
 
-rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
+# rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 install(TARGETS
+  waypoint_tracker
+  car_index_finder
   waypoint_manager
   pure_pursuit
   lane_path_follower
   a_star_planner
-  path_planning_main
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -70,7 +79,8 @@ install(PROGRAMS
   scripts/waypoint_recorder.py
   scripts/waypoint_visualizer.py
   scripts/road_network.py
-  scripts/route_generator.py
+  scripts/generate_full_map.py
+  scripts/generate_route.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

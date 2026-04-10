@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-road_network.py — Gazebo compact_city.world yol ağ modeli
-
-Asphalt bloklarının merkezlerinden iki şeritli yol ağı oluşturur.
-Her yol, sağ ve sol şerit olarak ayrılır (şerit genişliği = 2.0m).
-
-Kullanım:
-  from road_network import RoadNetwork
-  net = RoadNetwork()
-  lanes = net.get_all_lanes()
+--------------------------------------------------------------------------------
+Brief: Şehir Haritası Koordinat ve Şerit Modeli Tanım Dosyası (Gazebo compact_city.world)
+Description: 
+  Simülatör dünyasında bulunan (ve son olarak 1.5x oranında ölçeklenen) asfalt bloklarının,
+  döner kavşağın ve kavşak merkezlerinin geometrik modellerini birer matematiksel
+  dictionary yapısında (dict) tutar. Yolları sağ-sol ve karşılıklı yönlerden okuyarak 
+  gerçekçi bir trafik grid akışının şablonunu diğer sistemlere/scriptlere sunar.
+Kullanıldığı Yer: generate_full_map.py (merkez koordinatları ve waypoint sınırlarını almak için)
+--------------------------------------------------------------------------------
 """
 
 import math
@@ -21,36 +21,36 @@ from typing import List, Tuple, Dict, Optional, Set
 #  Yol Blok Verileri — compact_city.world'den çıkarıldı
 # ═══════════════════════════════════════════════════════════════════════
 
-TILE_SIZE = 5.0       # Her asphalt blok 5x5 metre
-LANE_OFFSET = 1.25    # Merkez çizgisinden şerit merkezine mesafe (5m / 4 = 1.25m)
-ROAD_Z = 0.5          # Waypoint z yüksekliği (yol yüzeyi biraz üstü)
+TILE_SIZE = 5.0 * 1.5           # Scaled world katsayisi
+LANE_OFFSET = 1.25 * 1.5        # Merkez çizgisinden şerit merkezine mesafe
+ROAD_Z = 0.5                    # Waypoint z yüksekliği (yol yüzeyi biraz üstü)
 
 # Yatay yollar (E-W) → y sabittir
 HORIZONTAL_ROADS = {
-    'north':  {'y': 32.5, 'x_range': (-27.5, 27.5), 'step': 5.0},
-    'mid_n':  {'y': 17.5, 'x_range': (-27.5, 27.5), 'step': 5.0},
-    'mid_s':  {'y': -2.5, 'x_range': (-27.5, 27.5), 'step': 5.0},
-    'south':  {'y': -22.5, 'x_range': (-27.5, 27.5), 'step': 5.0},
+    'north':  {'y': 32.5*1.5, 'x_range': (-27.5*1.5, 27.5*1.5), 'step': 5.0*1.5},
+    'mid_n':  {'y': 17.5*1.5, 'x_range': (-27.5*1.5, 27.5*1.5), 'step': 5.0*1.5},
+    'mid_s':  {'y': -2.5*1.5, 'x_range': (-27.5*1.5, 27.5*1.5), 'step': 5.0*1.5},
+    'south':  {'y': -22.5*1.5, 'x_range': (-27.5*1.5, 27.5*1.5), 'step': 5.0*1.5},
 }
 
 # Dikey yollar (N-S) → x sabittir
 VERTICAL_ROADS = {
-    'west':       {'x': -27.5, 'y_ranges': [(32.5, -22.5)]},
-    'inner_west': {'x': -12.5, 'y_ranges': [(32.5, -22.5)]},
-    'inner_east': {'x':  12.5, 'y_ranges': [(32.5, -22.5)]},
-    'east':       {'x':  27.5, 'y_ranges': [(32.5, -22.5)]},
-    'spur':       {'x':   2.5, 'y_ranges': [(-27.5, -32.5)]},
+    'west':       {'x': -27.5*1.5, 'y_ranges': [(32.5*1.5, -22.5*1.5)]},
+    'inner_west': {'x': -12.5*1.5, 'y_ranges': [(32.5*1.5, -22.5*1.5)]},
+    'inner_east': {'x':  12.5*1.5, 'y_ranges': [(32.5*1.5, -22.5*1.5)]},
+    'east':       {'x':  27.5*1.5, 'y_ranges': [(32.5*1.5, -22.5*1.5)]},
+    'spur':       {'x':   2.5*1.5, 'y_ranges': [(-27.5*1.5, -32.5*1.5)]},
 }
 
 # Kavşak merkezleri (yatay ve dikey yolların kesişimi)
 INTERSECTION_CENTERS = []
-for hy in [32.5, 17.5, -2.5, -22.5]:
-    for vx in [-27.5, -12.5, 12.5, 27.5]:
+for hy in [32.5*1.5, 17.5*1.5, -2.5*1.5, -22.5*1.5]:
+    for vx in [-27.5*1.5, -12.5*1.5, 12.5*1.5, 27.5*1.5]:
         INTERSECTION_CENTERS.append((vx, hy))
 
 # Döner kavşak
-ROUNDABOUT_CENTER = (-12.59, -2.52)
-ROUNDABOUT_RADIUS = 7.0
+ROUNDABOUT_CENTER = (-12.59*1.5, -2.52*1.5)
+ROUNDABOUT_RADIUS = 7.0*1.5
 
 
 @dataclass
@@ -225,8 +225,8 @@ class RoadNetwork:
             
             def check_dir(dir_name):
                 # Harita sınırları (yolların sonu)
-                xmin, xmax = -27.5, 27.5
-                ymin, ymax = -22.5, 32.5
+                xmin, xmax = -27.5*1.5, 27.5*1.5
+                ymin, ymax = -22.5*1.5, 32.5*1.5
                 # Yol merkezine göre dışarı taşmıyorsak o yönde yol vardır:
                 if dir_name == "west": return cx > xmin
                 if dir_name == "east": return cx < xmax

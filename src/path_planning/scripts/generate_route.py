@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
-A* ile rota planla ve bulunan rota için waypoints yaw değerlerini kullan
-Çıktı: rota.csv (x, y, z, yaw, adım)
+--------------------------------------------------------------------------------
+Brief: A* (A-Star) Algoritması ile Rota Planlayıcı
+Description:
+  `generate_full_map.py` çıktısı olan `full_road_map.csv` dosyasından 
+  sürülebilir noktaları/yönleri (`waypoints`)  ve çevresel engelleri (`road_grid_4wide.txt`) referans alarak 
+  başlangıç koordinatlarından hedefe giden, araç boyutlarına çarpmayan optümum 
+  en kisa yolu A* (A-Star) aracılığıyla belirler (yaw farkına ceza keserek).
+  En son yörüngeyi (path smoothing) düzleştirir ve "planned_route.csv" dosyasına yazar.
+Kullanıldığı Yer: Hedef tabanlı bir rotaya gidilmesi istendiğinde bağımsız path runner olarak
+                  örneğin PID takip edicilerinden hemen önce.
+--------------------------------------------------------------------------------
 """
 
 import numpy as np
@@ -23,8 +32,8 @@ def load_grid(grid_file):
 def world_to_grid(world_x, world_y, grid_shape=(68, 59)):
     """Dünya koordinatlarını grid koordinatlarına çevir"""
     grid_height, grid_width = grid_shape
-    min_x, max_x = -28.8, 28.8
-    min_y, max_y = -32.5, 33.8
+    min_x, max_x = -28.8 * 1.5, 28.8 * 1.5
+    min_y, max_y = -32.5 * 1.5, 33.8 * 1.5
     x_span = max_x - min_x
     y_span = max_y - min_y
     grid_x = round((world_x - min_x) / x_span * (grid_width - 1))
@@ -195,18 +204,18 @@ def grid_to_world(grid_x, grid_y, grid_shape=(68, 59)):
     """
     Grid koordinatlarını dünya koordinatlarına çevir
     Grid boyutu: 68 satır x 59 sütun
-    CSV aralığı: X[-28.8, 28.8] Y[-32.5, 33.8]
+    1.5x Ölçeklenmiş CSV aralığı: X[-43.2, 43.2] Y[-48.75, 50.7]
     """
     # Grid boyutu
     grid_height, grid_width = grid_shape  # 68, 59
     
-    # CSV koordinat aralığı
-    min_x, max_x = -28.8, 28.8
-    min_y, max_y = -32.5, 33.8
+    # CSV koordinat aralığı (1.5x)
+    min_x, max_x = -28.8 * 1.5, 28.8 * 1.5
+    min_y, max_y = -32.5 * 1.5, 33.8 * 1.5
     
     # Span
-    x_span = max_x - min_x  # 57.6
-    y_span = max_y - min_y  # 66.3
+    x_span = max_x - min_x  
+    y_span = max_y - min_y  
     
     # X artarak büyür (soldan sağa)
     x = min_x + (grid_x / (grid_width - 1)) * x_span
