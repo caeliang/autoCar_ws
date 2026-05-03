@@ -2,7 +2,7 @@
 # Fuses: Odometry + IMU + GPS
 
 ### EKF for odom frame (local) ###
-ekf_filter_node_odom:
+ekf_filter_node:
   ros__parameters:
     frequency: 30.0
     sensor_timeout: 0.5

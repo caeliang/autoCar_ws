@@ -15,7 +15,8 @@
 set -e
 
 WS=~/autoCar_ws
-GENERATE_SCRIPT="$WS/src/path_planning/scripts/generate_full_map.py"
+PYTHON="$WS/.venv/bin/python"
+GENERATE_SCRIPT="$WS/src/path_planning/scripts/path_planning/generate_full_map.py"
 VISUALIZE_SCRIPT="$WS/scripts/plot_waypoints.py"
 WAYPOINTS_FILE="$WS/waypoints/full_road_map.csv"
 GRID_FILE="$WS/matrices/road_grid_4wide.txt"
@@ -32,14 +33,14 @@ echo
 
 # Step 1: Waypoints + Yaw Hesaplama (tek script)
 echo "[1/2] Waypoints oluşturuluyor ve yaw hesaplanıyor..."
-python3 "$GENERATE_SCRIPT"
+"$PYTHON" "$GENERATE_SCRIPT" --source skeleton --grid "$WS/output_grids/planner_grid.npy"
 
 # Step 2: Görselleştirme (tüm waypoints)
 if [ -f "$VISUALIZE_SCRIPT" ] && [ -f "$WAYPOINTS_FILE" ]; then
     echo "[2/2] Görselleştirme oluşturuluyor (tüm waypoints)..."
     if [ -f "$GRID_FILE" ]; then
         OUTPUT_VIZ="$WS/waypoints/full_road_map.png"
-        timeout 30 python3 "$VISUALIZE_SCRIPT" "$WAYPOINTS_FILE" --grid "$GRID_FILE" 2>/dev/null || true
+        timeout 30 "$PYTHON" "$VISUALIZE_SCRIPT" "$WAYPOINTS_FILE" --grid "$GRID_FILE" 2>/dev/null || true
         echo "✓ Görselleştirme: $OUTPUT_VIZ"
     else
         echo "⚠ Grid dosyası bulunamadı, görselleştirme atlanıyor"

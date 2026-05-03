@@ -44,7 +44,7 @@ fi
 echo -e "${GREEN}  ✓ Gazebo is running${NC}"
 
 # ── 3. Harita kontrolü ───────────────────────────────────────────────
-MAP_NAME="${1:-test2}"
+MAP_NAME="${1:-scaled_build}"
 MAP_PATH="$HOME/autoCar_ws/maps/${MAP_NAME}.pcd"
 
 echo -e "${YELLOW}[3/4] Checking map: ${MAP_NAME}${NC}"
