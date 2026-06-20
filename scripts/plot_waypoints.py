@@ -27,6 +27,49 @@ def get_color_for_yaw(yaw):
     elif 240 <= y <= 300: return 'black'        # Güney
     else: return 'orange'                       # Kavşak/Dönüş
 
+def iter_connected_runs(group):
+    if group.empty:
+        return
+    rows = group.sort_values('step') if 'step' in group.columns else group
+    current = []
+    records = list(rows.to_dict('records'))
+    for idx, row in enumerate(records):
+        current.append(row)
+        connect_next = int(row.get('connect_next', 1)) if not pd.isna(row.get('connect_next', 1)) else 1
+        if connect_next == 0 or idx == len(records) - 1:
+            if len(current) >= 2:
+                yield pd.DataFrame(current)
+            current = []
+
+def draw_grouped_paths(ax, df, is_route):
+    group_cols = [c for c in ['direction', 'lane_id', 'segment_id'] if c in df.columns]
+    if not group_cols:
+        first = True
+        for run in iter_connected_runs(df):
+            ax.plot(
+                run['x'], run['y'],
+                color='darkgreen' if is_route else '#2677b8',
+                linewidth=2.0 if is_route else 1.3,
+                alpha=0.7,
+                label=f'Path groups' if first else None,
+                zorder=10,
+            )
+            first = False
+        return
+
+    first = True
+    for _, group in df.groupby(group_cols, sort=False):
+        for run in iter_connected_runs(group):
+            ax.plot(
+                run['x'], run['y'],
+                color='darkgreen' if is_route else '#2677b8',
+                linewidth=2.0 if is_route else 1.3,
+                alpha=0.7,
+                label=f'Path groups' if first else None,
+                zorder=10,
+            )
+            first = False
+
 def visualize_waypoints(csv_path, grid_path=None, base_map_csv=None, show_arrows=True, arrow_interval=1):
     if not os.path.exists(csv_path):
         print(f"Hata: {csv_path} bulunamadı.")
@@ -68,7 +111,7 @@ def visualize_waypoints(csv_path, grid_path=None, base_map_csv=None, show_arrows
 
     # Eger bu CSV planlanmıs bir ROTA ise cizgi ve markorler ekle
     if is_route:
-        ax.plot(df['x'], df['y'], 'g-', linewidth=2.5, alpha=0.6, label=f'Path ({len(df)} steps)', zorder=10)
+        draw_grouped_paths(ax, df, is_route)
         ax.scatter(df['x'], df['y'], c='lime', s=20, alpha=0.8, zorder=9, edgecolors='darkgreen', linewidth=0.5)
 
         if len(df) > 0:

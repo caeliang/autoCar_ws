@@ -13,6 +13,8 @@ struct Waypoint {
     double x = 0.0;
     double y = 0.0;
     double yaw = 0.0;  // radyan — aracın gittiği yön
+    std::string lane_id;
+    std::string direction_group;
 
     /// 2D mesafe
     double distance2D(const Waypoint& other) const {

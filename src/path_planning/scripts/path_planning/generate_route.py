@@ -326,10 +326,14 @@ def plan_route(grid_file, waypoint_file, start_x, start_y, goal_x, goal_y, outpu
         
         route_points.append({
             'step': i + 1,
+            'lane_id': 'route_001',
+            'segment_id': 'route_001_seg_001',
+            'direction': 'forward',
             'x': wx,
             'y': wy,
             'z': 0.5,
             'yaw': yaw,
+            'connect_next': 1 if i < len(path) - 1 else 0,
             'grid_x': gx,
             'grid_y': gy
         })
@@ -337,15 +341,25 @@ def plan_route(grid_file, waypoint_file, start_x, start_y, goal_x, goal_y, outpu
     # CSV'ye yaz
     print(f"Rota dosyasına yazılıyor: {output_csv}")
     with open(output_csv, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=['step', 'x', 'y', 'z', 'yaw', 'grid_x', 'grid_y'])
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                'step', 'lane_id', 'segment_id', 'direction',
+                'x', 'y', 'z', 'yaw', 'connect_next', 'grid_x', 'grid_y'
+            ]
+        )
         writer.writeheader()
         for point in route_points:
             writer.writerow({
                 'step': point['step'],
+                'lane_id': point['lane_id'],
+                'segment_id': point['segment_id'],
+                'direction': point['direction'],
                 'x': f"{point['x']:.2f}",
                 'y': f"{point['y']:.2f}",
                 'z': f"{point['z']:.2f}",
                 'yaw': f"{point['yaw']:.2f}",
+                'connect_next': point['connect_next'],
                 'grid_x': point['grid_x'],
                 'grid_y': point['grid_y']
             })
@@ -367,7 +381,7 @@ def plan_route(grid_file, waypoint_file, start_x, start_y, goal_x, goal_y, outpu
 
 if __name__ == "__main__":
     grid_file = "/home/ranim/autoCar_ws/matrices/road_grid_4wide.txt"
-    waypoint_file = "/home/ranim/autoCar_ws/waypoints/full_road_map.csv"
+    waypoint_file = "/home/ranim/autoCar_ws/waypoints/two_way_lane_waypoints.csv"
     output_csv = "/home/ranim/autoCar_ws/waypoints/planned_route.csv"
     
     # Parametreleri dogrudan alalim

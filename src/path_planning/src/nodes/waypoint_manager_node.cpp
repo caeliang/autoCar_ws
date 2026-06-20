@@ -280,8 +280,13 @@ private:
 
         for (int i = 0; i < count; ++i) {
             int idx = (current_wp_ + i) % n;
-            path_msg.poses.push_back(
-                waypoints_[idx].toPoseStamped(frame_id_, now()));
+            auto pose = waypoints_[idx].toPoseStamped(frame_id_, now());
+            if (!waypoints_[idx].lane_id.empty() || !waypoints_[idx].direction_group.empty()) {
+                pose.header.frame_id = frame_id_ + "|" +
+                    waypoints_[idx].lane_id + "|" +
+                    waypoints_[idx].direction_group;
+            }
+            path_msg.poses.push_back(pose);
         }
 
         path_pub_->publish(path_msg);

@@ -126,7 +126,9 @@ WaypointList loadWaypointsCSV(const std::string& filepath) {
     WaypointList waypoints;
     std::string line;
     
-    int x_idx = -1, y_idx = -1, yaw_idx = -1;
+    int x_idx = -1, y_idx = -1, yaw_idx = -1, connect_idx = -1;
+    int lane_id_idx = -1, direction_group_idx = -1;
+    int connect_breaks = 0;
     bool header_parsed = false;
 
     while (std::getline(ifs, line)) {
@@ -145,6 +147,9 @@ WaypointList loadWaypointsCSV(const std::string& filepath) {
                 if (tokens[i] == "x") x_idx = i;
                 else if (tokens[i] == "y") y_idx = i;
                 else if (tokens[i] == "yaw") yaw_idx = i;
+                else if (tokens[i] == "connect_next") connect_idx = i;
+                else if (tokens[i] == "lane_id") lane_id_idx = i;
+                else if (tokens[i] == "direction_group") direction_group_idx = i;
             }
             if (x_idx == -1 || y_idx == -1) {
                 throw std::runtime_error("CSV file must contain at least 'x' and 'y' columns in the header.");
@@ -165,10 +170,28 @@ WaypointList loadWaypointsCSV(const std::string& filepath) {
             } else {
                 wp.yaw = 0.0;
             }
+            if (connect_idx != -1 && tokens.size() > static_cast<size_t>(connect_idx)) {
+                if (std::stoi(tokens[connect_idx]) == 0) {
+                    connect_breaks++;
+                }
+            }
+            if (lane_id_idx != -1 && tokens.size() > static_cast<size_t>(lane_id_idx)) {
+                wp.lane_id = tokens[lane_id_idx];
+            }
+            if (direction_group_idx != -1 && tokens.size() > static_cast<size_t>(direction_group_idx)) {
+                wp.direction_group = tokens[direction_group_idx];
+            }
             waypoints.push_back(wp);
         } catch (...) {
             // Ignore malformed rows
         }
+    }
+
+    if (connect_breaks > 1) {
+        throw std::runtime_error(
+            "CSV contains multiple disconnected lane/segment breaks. "
+            "This is a waypoint database, not a single planned route. "
+            "Generate/use waypoints/planned_route.csv for waypoint following.");
     }
 
     // Eğer yaw sütunu yoksa veya hepsi 0 ise, ardışık noktalardan yaw hesapla

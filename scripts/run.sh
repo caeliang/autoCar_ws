@@ -1,5 +1,38 @@
+#!/bin/bash
+#===============================================================================
+# COMPACT CITY - Gazebo Simulation Launcher
+#===============================================================================
+# This script launches Gazebo simulation with compact_city.world
+# Includes both gzserver and gzclient (GUI)
+#
+# After this, run SLAM+EKF separately:
+#   ./run_slam_ekf.sh
+#===============================================================================
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}"
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║           COMPACT CITY - Gazebo Simulation                     ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo -e "${NC}"
+
+# Navigate to workspace
+cd ~/autoCar_ws
+
+# Source workspace
+echo -e "${YELLOW}[1/4] Sourcing workspace...${NC}"
+source install/setup.bash
+
+# Set environment variables
 WORKSPACE_DIR="$HOME/autoCar_ws"
-WORLD_FILE="$WORKSPACE_DIR/src/worlds/compact_city.world"
 WORLD_FILE="$WORKSPACE_DIR/src/worlds/compact_city_scaled.world"
 MODELS_PATH="$WORKSPACE_DIR/src/models"
 PLUGIN_PATH="$WORKSPACE_DIR/install/gazebo_traffic_light_plugin/lib"
@@ -67,3 +100,4 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Wait for user to stop
+wait

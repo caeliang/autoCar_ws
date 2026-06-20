@@ -116,7 +116,7 @@ def main():
                 node.target_angular = 0.0
             
             speed = abs(node.linear) * 3.6
-            print(f'\rHiz: {speed:4.1f} km/h | Donus: {node.angular:+.2f}  ', end='', flush=True)
+            print(f'\rHiz: {speed:5.1f} km/h | Donus: {node.angular:+.4f}  ', end='', flush=True)
 
     except KeyboardInterrupt:
         print('\n\nCikis...')

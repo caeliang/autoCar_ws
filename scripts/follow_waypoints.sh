@@ -7,7 +7,7 @@
 #    ./scripts/follow_waypoints.sh <waypoint_file> [options]
 #
 #  Örnekler:
-#    ./scripts/follow_waypoints.sh waypoints/route_20260225.yaml
+#    ./scripts/follow_waypoints.sh waypoints/planned_route_smoothed.csv
 #    ./scripts/follow_waypoints.sh waypoints/route.yaml --loop
 #    ./scripts/follow_waypoints.sh waypoints/route.yaml --speed 2.0
 # ──────────────────────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ if [ -z "$WP_FILE" ]; then
     echo ""
     echo "Mevcut waypoint dosyaları:"
     ls -1 "$WS"/waypoints/*.yaml 2>/dev/null || echo "  (yok — önce kayıt yap)"
+    ls -1 "$WS"/waypoints/*.csv 2>/dev/null || true
     exit 1
 fi
 
@@ -50,7 +51,11 @@ if [ ! -f "$WP_FILE" ]; then
     exit 1
 fi
 
-WP_COUNT=$(grep -c "^  - x:" "$WP_FILE" 2>/dev/null || echo "?")
+if [[ "$WP_FILE" == *.csv ]]; then
+    WP_COUNT=$(($(wc -l < "$WP_FILE") - 1))
+else
+    WP_COUNT=$(grep -c "^  - x:" "$WP_FILE" 2>/dev/null || echo "?")
+fi
 
 cd "$WS"
 source install/setup.bash
