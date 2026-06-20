@@ -10,12 +10,16 @@ def generate_launch_description():
             name='pure_pursuit',
             output='screen',
             parameters=[{
-                'max_speed': 2.0,
+                'max_speed': 1,
                 'min_speed': 0.3,
-                'min_lookahead': 1.5,
-                'max_lookahead': 5.0,
-                'lookahead_ratio': 1.5,
-                'max_omega': 1.0,
+                'straight_speed': 1.0,
+                'turn_speed': 0.7,
+                'min_lookahead': 3.0,
+                'max_lookahead': 7.0,  
+                'lookahead_ratio': 2.0,
+                'max_omega': 0.7,
+                'speed_filter_alpha': 0.18,
+                'curvature_slowdown_gain': 4.0,
             }]
         )
     ])
