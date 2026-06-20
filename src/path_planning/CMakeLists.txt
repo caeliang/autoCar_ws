@@ -73,6 +73,8 @@ install(PROGRAMS
   scripts/path_planning/road_network.py
   scripts/path_planning/generate_full_map.py
   scripts/path_planning/generate_route.py
+  scripts/path_planning/route_recorder
+  scripts/path_planning/route_recorder.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
