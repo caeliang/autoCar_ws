@@ -48,11 +48,17 @@ public:
         declare_parameter<bool>("loop", true);
         declare_parameter<double>("publish_rate", 10.0);
         declare_parameter<int>("path_horizon", 50);
+        declare_parameter<bool>("start_from_first", true);
+        declare_parameter<int>("resync_window", 120);
+        declare_parameter<double>("resync_distance", 3.0);
 
         frame_id_     = get_parameter("frame_id").as_string();
         goal_tol_     = get_parameter("goal_tolerance").as_double();
         loop_         = get_parameter("loop").as_bool();
         path_horizon_ = get_parameter("path_horizon").as_int();
+        start_from_first_ = get_parameter("start_from_first").as_bool();
+        resync_window_ = get_parameter("resync_window").as_int();
+        resync_distance_ = get_parameter("resync_distance").as_double();
 
         load_waypoints();
         create_interfaces();
@@ -153,12 +159,13 @@ private:
 
         // İlk başlatma: en yakın waypoint'i bul
         if (!initialized_) {
-            current_wp_ = find_nearest_ahead();
+            current_wp_ = start_from_first_ ? 0 : find_nearest_ahead();
             initialized_ = true;
             RCLCPP_INFO(get_logger(),
-                "▶ WP %d'den başlanıyor (%.1f,%.1f)",
+                "▶ WP %d'den başlanıyor (%.1f,%.1f), start_from_first=%s",
                 current_wp_, waypoints_[current_wp_].x,
-                waypoints_[current_wp_].y);
+                waypoints_[current_wp_].y,
+                start_from_first_ ? "true" : "false");
         }
 
         // Waypoint ilerleme takibi
@@ -178,7 +185,7 @@ private:
     // ═══════════════════════════════════════════════════════════════
     void track_progress()
     {
-        int n = static_cast<int>(waypoints_.size());
+        resync_to_nearest_forward_waypoint();
         int max_advances = 50;  // sonsuz döngü önleme
 
         for (int attempt = 0; attempt < max_advances; ++attempt) {
@@ -201,6 +208,35 @@ private:
             }
 
             break;  // WP önde ve yeterince uzak → bekle
+        }
+    }
+
+    void resync_to_nearest_forward_waypoint()
+    {
+        int n = static_cast<int>(waypoints_.size());
+        if (n <= 0) return;
+
+        int best_idx = current_wp_;
+        double best_dist = 1e18;
+        int window = std::max(1, resync_window_);
+        int max_idx = loop_ ? current_wp_ + window : std::min(n - 1, current_wp_ + window);
+
+        for (int raw = current_wp_; raw <= max_idx; ++raw) {
+            int idx = loop_ ? (raw % n) : raw;
+            double dx = waypoints_[idx].x - car_x_;
+            double dy = waypoints_[idx].y - car_y_;
+            double d = std::sqrt(dx * dx + dy * dy);
+            if (d < best_dist) {
+                best_dist = d;
+                best_idx = idx;
+            }
+        }
+
+        if (best_idx != current_wp_ && best_dist < resync_distance_) {
+            RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 1000,
+                "↻ Route resync: WP %d -> %d (dist=%.2fm)",
+                current_wp_, best_idx, best_dist);
+            current_wp_ = best_idx;
         }
     }
 
@@ -319,6 +355,9 @@ private:
     double goal_tol_     = 1.5;
     bool loop_           = true;
     int path_horizon_    = 50;
+    bool start_from_first_ = true;
+    int resync_window_ = 120;
+    double resync_distance_ = 3.0;
 
     int current_wp_      = 0;
     bool finished_       = false;

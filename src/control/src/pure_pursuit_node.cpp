@@ -49,6 +49,15 @@ public:
         declare_parameter<double>("curvature_slowdown_gain", 4.0);
         declare_parameter<bool>("debug_enable", true);
 
+        // Lane Capture: başlangıçta büyük lateral hatayı yumuşatmak için
+        declare_parameter<double>("lane_capture_threshold", 0.8);   // m — bu değerin üstünde capture aktif
+        declare_parameter<double>("lane_capture_lookahead", 1.5);   // m — capture sırasında kullanılacak küçük lookahead
+        declare_parameter<double>("lane_capture_exit_error", 0.3);  // m — bu değerin altına düşünce capture biter
+        declare_parameter<int>("startup_debug_ticks", 200);         // ilk kaç tick'te detaylı log
+        declare_parameter<bool>("require_odom", false);             // false: odom yoksa localization yaw ile devam et
+        declare_parameter<double>("goal_tolerance", 1.0);           // m — hedefe bu kadar yaklaşınca rota biter
+        declare_parameter<bool>("parking_brake_on_goal", true);     // hedefte sıfır cmd_vel'i kilitli tut
+
         // Yeni global parametreler
         declare_parameter<bool>("global_brake", false);
         declare_parameter<double>("global_speed", get_parameter("straight_speed").as_double());
@@ -64,15 +73,33 @@ public:
         speed_filter_alpha_ = get_parameter("speed_filter_alpha").as_double();
         curvature_slowdown_gain_ = get_parameter("curvature_slowdown_gain").as_double();
         debug_enable_ = get_parameter("debug_enable").as_bool();
+        lane_capture_threshold_ = get_parameter("lane_capture_threshold").as_double();
+        lane_capture_lookahead_ = get_parameter("lane_capture_lookahead").as_double();
+        lane_capture_exit_error_ = get_parameter("lane_capture_exit_error").as_double();
+        startup_debug_ticks_ = get_parameter("startup_debug_ticks").as_int();
+        require_odom_ = get_parameter("require_odom").as_bool();
+        goal_tolerance_ = get_parameter("goal_tolerance").as_double();
+        parking_brake_on_goal_ = get_parameter("parking_brake_on_goal").as_bool();
 
         // ── Subscribers ─────────────────────────────────────────────
         path_sub_ = create_subscription<nav_msgs::msg::Path>(
             "/waypoints/path", rclcpp::QoS(10),
             [this](nav_msgs::msg::Path::ConstSharedPtr msg) {
+                const std::string new_signature = make_path_signature(*msg);
+                const bool path_changed = (new_signature != path_signature_);
                 path_ = *msg;
                 path_ok_ = !path_.poses.empty();
                 path_received_ = true;
                 waypoint_count_ = static_cast<int>(path_.poses.size());
+                if (path_changed) {
+                    path_signature_ = new_signature;
+                    goal_reached_latched_ = false;
+                    finished_ = false;
+                    filtered_speed_ = 0.0;
+                    filtered_speed_initialized_ = false;
+                    RCLCPP_WARN(get_logger(),
+                        "[PP PATH] new path detected. Parking brake latch reset.");
+                }
                 if (path_ok_) {
                     const auto& first = path_.poses.front().pose.position;
                     const auto& last = path_.poses.back().pose.position;
@@ -95,6 +122,13 @@ public:
             [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) {
                 car_x_ = msg->pose.position.x;
                 car_y_ = msg->pose.position.y;
+                if (!odom_ok_) {
+                    const auto& q = msg->pose.orientation;
+                    car_yaw_ = std::atan2(
+                        2.0 * (q.w * q.z + q.x * q.y),
+                        1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+                    car_speed_ = 0.0;
+                }
                 pose_ok_ = true;
                 pose_received_ = true;
                 pose_frame_id_ = msg->header.frame_id;
@@ -140,14 +174,17 @@ public:
             [this](std_msgs::msg::String::ConstSharedPtr msg) {
                 status_received_ = true;
                 last_status_ = msg->data;
-                finished_ = (msg->data == "FINISHED" ||
-                             msg->data == "NO_WAYPOINTS");
+                const bool status_finished = (msg->data == "FINISHED" ||
+                                              msg->data == "NO_WAYPOINTS");
+                finished_ = goal_reached_latched_ ? true : status_finished;
                 RCLCPP_WARN(get_logger(),
-                    "[PP STATUS] last_status='%s' finished_flag=%s",
-                    last_status_.c_str(), finished_ ? "true" : "false");
+                    "[PP STATUS] last_status='%s' finished_flag=%s parking_brake_latched=%s",
+                    last_status_.c_str(),
+                    finished_ ? "true" : "false",
+                    goal_reached_latched_ ? "true" : "false");
                 if (finished_) {
                     RCLCPP_ERROR(get_logger(),
-                        "[PP STATUS] FINISHED_ROUTE set by /waypoints/status='%s'. Vehicle will not move until waypoint manager republishes an active path/status.",
+                        "[PP STATUS] FINISHED_ROUTE set by /waypoints/status='%s'. If parking brake is latched, vehicle will not move until a different path is received.",
                         last_status_.c_str());
                 }
             });
@@ -194,8 +231,12 @@ private:
             publish_stop(cmd, "NO_POSE");
             return;
         }
-        if (!odom_ok_) {
+        if (require_odom_ && !odom_ok_) {
             publish_stop(cmd, "NO_ODOM");
+            return;
+        }
+        if (goal_reached_latched_) {
+            publish_stop(cmd, "GOAL_REACHED_PARKING_BRAKE");
             return;
         }
         if (finished_) {
@@ -213,6 +254,13 @@ private:
             std::pow(path_.poses[current_waypoint_index_].pose.position.x - car_x_, 2) +
             std::pow(path_.poses[current_waypoint_index_].pose.position.y - car_y_, 2));
 
+        const double goal_distance = distance_to_goal();
+        if (goal_distance <= goal_tolerance_) {
+            engage_goal_parking_brake(goal_distance);
+            publish_stop(cmd, "GOAL_REACHED");
+            return;
+        }
+
         // 1) Hedef noktayı seç: hızla büyüyen, path uzunluğu üzerinden ölçülen lookahead.
         double target_x = car_x_;
         double target_y = car_y_;
@@ -224,14 +272,33 @@ private:
             min_la_,
             max_la_);
 
+        // ── Lane Capture Mode ──────────────────────────────────────────
+        // Araç lane'den uzak başlarsa (büyük lateral hata) küçük lookahead
+        // kullanarak yumuşak yakalama yapar; hedefe çok erken sapmaz.
+        double abs_lateral = std::abs(calc_lateral_error(current_waypoint_index_));
+        if (abs_lateral > lane_capture_threshold_) {
+            lane_capture_active_ = true;
+        } else if (abs_lateral < lane_capture_exit_error_) {
+            lane_capture_active_ = false;
+        }
+        if (lane_capture_active_) {
+            desired_lookahead = std::min(desired_lookahead, lane_capture_lookahead_);
+        }
+
+        // Nearest waypoint'in lane_id'sini önceden çıkar (lookahead kısıtı için)
+        std::string cur_nearest_lane, cur_nearest_dir;
+        parse_pose_metadata(current_waypoint_index_, cur_nearest_lane, cur_nearest_dir);
+
         if (!find_lookahead_point(current_waypoint_index_, desired_lookahead,
                                   target_x, target_y, lookahead_index_,
-                                  lookahead_distance_)) {
+                                  lookahead_distance_,
+                                  lane_capture_active_ ? cur_nearest_lane : "")) {
             target_x = path_.poses.back().pose.position.x;
             target_y = path_.poses.back().pose.position.y;
             lookahead_index_ = static_cast<int>(path_.poses.size()) - 1;
             lookahead_distance_ = std::sqrt(std::pow(target_x - car_x_, 2) + std::pow(target_y - car_y_, 2));
-            if (lookahead_distance_ < 0.25) {
+            if (lookahead_distance_ < goal_tolerance_) {
+                engage_goal_parking_brake(lookahead_distance_);
                 publish_stop(cmd, "GOAL_REACHED");
                 return;
             }
@@ -253,6 +320,27 @@ private:
         double pure_pursuit_alpha = normalize_angle(target_yaw - car_yaw_);
         double alpha = normalize_angle(0.75 * pure_pursuit_alpha + 0.25 * yaw_error);
         double lateral_error = calc_lateral_error(current_waypoint_index_);
+        
+        // ── Startup Debug Log (ilk N tick her döngüde) ────────────────
+        if (tick_ <= startup_debug_ticks_) {
+            double nn_x = path_.poses[current_waypoint_index_].pose.position.x;
+            double nn_y = path_.poses[current_waypoint_index_].pose.position.y;
+            RCLCPP_WARN(get_logger(),
+                "[PP STARTUP tick=%03d] "
+                "vehicle=(%.3f, %.3f, %.1fdeg) "
+                "nearest=(%.3f, %.3f, %.1fdeg) lane='%s' "
+                "lat_err=%.3fm yaw_err=%.1fdeg "
+                "lookahead_idx=%d lookahead=(%.3f, %.3f) la_dist=%.2fm "
+                "lane_capture=%s eff_la=%.2fm alpha=%.1fdeg",
+                tick_,
+                car_x_, car_y_, car_yaw_ * 180.0 / M_PI,
+                nn_x, nn_y, nearest_path_yaw * 180.0 / M_PI,
+                cur_nearest_lane.c_str(),
+                lateral_error, yaw_error * 180.0 / M_PI,
+                lookahead_index_, target_x, target_y, lookahead_distance_,
+                lane_capture_active_ ? "ON" : "OFF", desired_lookahead,
+                alpha * 180.0 / M_PI);
+        }
         
         // 4) Komutları üret: eğrilik ve heading hatasına göre hız azalt.
         double k_angular = 1.0;
@@ -342,8 +430,57 @@ private:
     void publish_stop(const geometry_msgs::msg::Twist& cmd, const std::string& reason)
     {
         last_stop_reason_ = reason;
+        filtered_speed_ = 0.0;
+        geometry_msgs::msg::Twist stop_cmd = cmd;
+        stop_cmd.linear.x = 0.0;
+        stop_cmd.linear.y = 0.0;
+        stop_cmd.linear.z = 0.0;
+        stop_cmd.angular.x = 0.0;
+        stop_cmd.angular.y = 0.0;
+        stop_cmd.angular.z = 0.0;
         log_health_report(reason);
-        cmd_pub_->publish(cmd);
+        cmd_pub_->publish(stop_cmd);
+    }
+
+    std::string make_path_signature(const nav_msgs::msg::Path& path) const
+    {
+        if (path.poses.empty()) {
+            return "empty";
+        }
+
+        const auto& first = path.poses.front().pose.position;
+        const auto& last = path.poses.back().pose.position;
+        return std::to_string(path.poses.size()) + "|" +
+               std::to_string(first.x) + "|" +
+               std::to_string(first.y) + "|" +
+               std::to_string(last.x) + "|" +
+               std::to_string(last.y);
+    }
+
+    double distance_to_goal() const
+    {
+        if (path_.poses.empty()) {
+            return std::numeric_limits<double>::infinity();
+        }
+
+        const auto& goal = path_.poses.back().pose.position;
+        return std::hypot(goal.x - car_x_, goal.y - car_y_);
+    }
+
+    void engage_goal_parking_brake(double goal_distance)
+    {
+        if (!parking_brake_on_goal_) {
+            return;
+        }
+
+        goal_reached_latched_ = true;
+        finished_ = true;
+        filtered_speed_ = 0.0;
+        filtered_speed_initialized_ = false;
+        RCLCPP_ERROR(get_logger(),
+            "[PP GOAL] goal reached: distance=%.3fm tolerance=%.3fm. Parking brake latch engaged; publishing zero cmd_vel until a different path is received.",
+            goal_distance,
+            goal_tolerance_);
     }
 
     void log_health_report(const std::string& reason)
@@ -476,9 +613,12 @@ private:
     }
 
     // ── Path boyunca yürüyerek lookahead noktası bul ────────────────
+    // same_lane_id boş değilse, farklı lane_id'ye geçildiği anda dur
+    // (lane capture modunda aynı şerit içinde kal).
     bool find_lookahead_point(int from_idx, double la_dist,
                               double& out_x, double& out_y,
-                              int& out_idx, double& out_dist)
+                              int& out_idx, double& out_dist,
+                              const std::string& same_lane_id = "")
     {
         double accumulated = 0.0;
         int n = static_cast<int>(path_.poses.size());
@@ -497,6 +637,21 @@ private:
         }
 
         for (int i = from_idx; i < n - 1; ++i) {
+            // ── Lane kısıtı: aynı lane_id dışına çıkma ───────────────
+            if (!same_lane_id.empty()) {
+                std::string seg_lane, seg_dir;
+                parse_pose_metadata(i + 1, seg_lane, seg_dir);
+                if (!seg_lane.empty() && seg_lane != "<none>" &&
+                    seg_lane != same_lane_id) {
+                    // Lane sınırına ulaştık — en son geçerli noktayı döndür
+                    out_x = path_.poses[i].pose.position.x;
+                    out_y = path_.poses[i].pose.position.y;
+                    out_idx = i;
+                    out_dist = accumulated;
+                    return out_idx >= from_idx;
+                }
+            }
+
             double dx = path_.poses[i + 1].pose.position.x
                       - path_.poses[i].pose.position.x;
             double dy = path_.poses[i + 1].pose.position.y
@@ -589,6 +744,15 @@ private:
     double speed_filter_alpha_;
     double curvature_slowdown_gain_;
     bool debug_enable_ = true;
+    bool require_odom_ = false;
+    double goal_tolerance_ = 1.0;
+    bool parking_brake_on_goal_ = true;
+    // Lane capture
+    double lane_capture_threshold_ = 0.8;
+    double lane_capture_lookahead_ = 1.5;
+    double lane_capture_exit_error_ = 0.3;
+    bool lane_capture_active_ = false;
+    int startup_debug_ticks_ = 200;
 
     // ── Durum ───────────────────────────────────────────────────────
     double car_x_ = 0, car_y_ = 0, car_yaw_ = 0, car_speed_ = 0;
@@ -597,6 +761,7 @@ private:
     bool path_received_ = false, pose_received_ = false, odom_received_ = false;
     bool status_received_ = false;
     bool finished_ = false;
+    bool goal_reached_latched_ = false;
     int tick_ = 0;
     int waypoint_count_ = 0;
     int current_waypoint_index_ = -1;
@@ -624,6 +789,7 @@ private:
     std::string last_lookahead_direction_group_ = "<none>";
     std::string last_status_ = "<none>";
     std::string last_stop_reason_ = "<none>";
+    std::string path_signature_;
     nav_msgs::msg::Path path_;
 
     // ── ROS ─────────────────────────────────────────────────────────

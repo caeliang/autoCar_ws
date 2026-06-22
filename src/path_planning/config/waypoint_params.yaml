@@ -9,6 +9,9 @@ waypoint_manager:
     loop: false                # hedefe ulaştığında dursun (döngü kapalı)
     publish_rate: 10.0         # Hz
     path_horizon: 50           # ilerideki kaç waypoint path'e dahil edilsin
+    start_from_first: true     # planlı rotada en yakın WP'ye atlama; CSV başından başla
+    resync_window: 120         # araç rota üzerinde ileri kaçtıysa bu pencere içinde tekrar yakala
+    resync_distance: 3.0       # m — route resync için maksimum yakınlık
 
 pure_pursuit:
   ros__parameters:
