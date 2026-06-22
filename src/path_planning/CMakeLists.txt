@@ -76,6 +76,12 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  scripts/path_planning/dynamic_route_manager_node.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME dynamic_route_manager_node
+)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

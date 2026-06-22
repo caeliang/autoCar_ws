@@ -16,6 +16,8 @@
   <depend>std_srvs</depend>
   <depend>visualization_msgs</depend>
   <depend>perception</depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>tf_transformations</exec_depend>
 
   <buildtool_depend>rosidl_default_generators</buildtool_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>

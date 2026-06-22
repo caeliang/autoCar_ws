@@ -21,6 +21,12 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  scripts/traffic_sign_localizer_node.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME traffic_sign_localizer_node
+)
+
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
