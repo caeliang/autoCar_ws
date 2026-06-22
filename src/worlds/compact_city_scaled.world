@@ -20224,10 +20224,10 @@
       </link>
     </model>
     <state world_name='compact_city'>
-      <sim_time>3849 490000000</sim_time>
-      <real_time>70 631641637</real_time>
-      <wall_time>1775825978 860291837</wall_time>
-      <iterations>62469</iterations>
+      <sim_time>4275 244000000</sim_time>
+      <real_time>479 406689878</real_time>
+      <wall_time>1782126896 693275050</wall_time>
+      <iterations>425754</iterations>
       <model name='ac_354'>
         <pose>-37.6227 48.748 0.038 0 0 -3.10888</pose>
         <scale>1 1 1</scale>
@@ -24828,16 +24828,6 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='bin_4'>
-        <pose>18 33 0.5 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>18 33 0.5 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='bin_5'>
         <pose>-45 22.5 0.5 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -28048,16 +28038,6 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='pole_1'>
-        <pose>-45 48 2.5 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>-45 48 2.5 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='pole_10'>
         <pose>52.5 -15 2.5 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -28078,31 +28058,11 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='pole_3'>
-        <pose>0 52.5 2.5 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>0 52.5 2.5 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='pole_4'>
         <pose>0 -52.5 2.5 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
           <pose>0 -52.5 2.5 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='pole_5'>
-        <pose>-52.5 45 2.5 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>-52.5 45 2.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -28149,55 +28109,55 @@
         </link>
       </model>
       <model name='prius'>
-        <pose>-42.9844 47.8671 0.011641 -2e-06 0 0.038973</pose>
+        <pose>-42.9827 47.869 0.011641 -2e-06 0 0.039863</pose>
         <scale>1 1 1</scale>
         <link name='prius_hybrid::chassis'>
-          <pose>-42.9844 47.8671 0.041641 -2e-06 0 0.038973</pose>
-          <velocity>6e-06 6e-06 2.1e-05 -3e-06 -0 3e-06</velocity>
-          <acceleration>0.00043 0.000315 -2.7e-05 -6e-06 -0 0.000202</acceleration>
-          <wrench>0.569705 0.418243 -0.036047 0 -0 0</wrench>
+          <pose>-42.9827 47.869 0.041641 -2e-06 0 0.039863</pose>
+          <velocity>4e-06 3e-06 2.1e-05 -3e-06 -0 2e-06</velocity>
+          <acceleration>0.000736 0.000807 -0.001273 0.00028 5.3e-05 0.000325</acceleration>
+          <wrench>0.975809 1.07052 -1.6875 0 -0 0</wrench>
         </link>
         <link name='prius_hybrid::front_left_wheel'>
-          <pose>-42.1701 46.4877 0.341646 -0.994229 -0.066818 -0.831849</pose>
-          <velocity>1e-05 9e-06 3.2e-05 -2.7e-05 3e-05 5e-06</velocity>
-          <acceleration>0.000563 0.000429 -1.9e-05 -0.001432 0.000834 -0.000698</acceleration>
-          <wrench>0.006191 0.004718 -0.000206 0 -0 0</wrench>
+          <pose>-42.1671 46.4905 0.341646 -1.00656 -0.066818 -0.830959</pose>
+          <velocity>7e-06 6e-06 3.1e-05 -1.9e-05 2e-05 1.1e-05</velocity>
+          <acceleration>0.000646 0.000682 -0.001513 -0.002441 0.000704 -0.002087</acceleration>
+          <wrench>0.007111 0.007506 -0.016645 0 -0 0</wrench>
         </link>
         <link name='prius_hybrid::front_right_wheel'>
-          <pose>-43.6889 46.4285 0.341646 -2.90563 -0.065635 -0.811046</pose>
-          <velocity>1.1e-05 4e-06 3.2e-05 -1.5e-05 3.3e-05 0.000245</velocity>
-          <acceleration>0.000741 0.000177 -2.3e-05 -0.000844 0.002244 0.029799</acceleration>
-          <wrench>0.008155 0.001942 -0.000253 0 -0 0</wrench>
+          <pose>-43.6859 46.4299 0.341646 -2.91508 -0.062545 -0.757949</pose>
+          <velocity>7e-06 3e-06 3.1e-05 -1e-05 2e-05 0.000109</velocity>
+          <acceleration>0.00098 0.000413 -0.001479 -0.001604 0.002525 0.028417</acceleration>
+          <wrench>0.010778 0.004541 -0.016269 0 -0 0</wrench>
         </link>
         <link name='prius_hybrid::rear_axle'>
-          <pose>-43.0409 49.316 0.341642 -3e-06 -4e-06 0.038973</pose>
-          <velocity>2e-06 7e-06 2e-05 -7e-06 -4e-06 3e-06</velocity>
-          <acceleration>7.9e-05 0.000291 -1.7e-05 -0.049059 -0.001931 0.000224</acceleration>
-          <wrench>0.002375 0.008742 -0.000501 0 -0 0</wrench>
+          <pose>-43.0405 49.3179 0.341642 -3e-06 -4e-06 0.039863</pose>
+          <velocity>1e-06 4e-06 2e-05 1e-06 -4e-06 2e-06</velocity>
+          <acceleration>0.000154 0.000812 -0.000669 -0.051579 -0.002244 0.000327</acceleration>
+          <wrench>0.004631 0.024347 -0.02008 0 -0 0</wrench>
         </link>
         <link name='prius_hybrid::rear_left_wheel'>
-          <pose>-42.2555 49.3466 0.341647 -0.618664 -4e-06 0.038973</pose>
-          <velocity>1e-06 9e-06 2.5e-05 -2.8e-05 -0 3e-06</velocity>
-          <acceleration>5.2e-05 0.000441 2e-06 -0.001407 0.000199 0.000224</acceleration>
-          <wrench>0.000569 0.00485 1.9e-05 0 -0 0</wrench>
+          <pose>-42.2551 49.3492 0.341647 -0.626813 -4e-06 0.039863</pose>
+          <velocity>1e-06 6e-06 2.5e-05 -1.8e-05 -2e-06 2e-06</velocity>
+          <acceleration>9.6e-05 0.000952 -0.000505 -0.003047 0.000391 0.000327</acceleration>
+          <wrench>0.001051 0.010469 -0.005556 0 -0 0</wrench>
         </link>
         <link name='prius_hybrid::rear_right_wheel'>
-          <pose>-43.8263 49.2853 0.341647 -2.08026 8e-06 0.038973</pose>
-          <velocity>2e-06 4e-06 2.5e-05 -9e-06 3e-06 3e-06</velocity>
-          <acceleration>7.2e-05 4.1e-05 2e-06 -0.000117 0.000226 0.000244</acceleration>
-          <wrench>0.00079 0.000451 1.7e-05 0 -0 0</wrench>
+          <pose>-43.8259 49.2866 0.341647 -2.08297 8e-06 0.039863</pose>
+          <velocity>1e-06 3e-06 2.5e-05 -6e-06 2e-06 2e-06</velocity>
+          <acceleration>0.000148 0.00039 -0.000504 -0.001249 0.000508 0.000412</acceleration>
+          <wrench>0.00163 0.004294 -0.005549 0 -0 0</wrench>
         </link>
         <link name='prius_hybrid::steering_wheel'>
-          <pose>-42.6041 47.2541 1.028 -0.661578 1.22756 0.918945</pose>
-          <velocity>8e-06 1e-05 2.3e-05 -1.5e-05 0.000301 8.6e-05</velocity>
-          <acceleration>0.000441 0.000392 -3.9e-05 -0.001334 0.034163 0.008363</acceleration>
-          <wrench>0.000441 0.000392 -3.9e-05 0 -0 0</wrench>
+          <pose>-42.602 47.2564 1.02798 -0.50662 1.26223 1.08334</pose>
+          <velocity>5e-06 7e-06 2.3e-05 -7e-06 0.000109 3.2e-05</velocity>
+          <acceleration>0.000852 0.000785 -0.001416 -0.000715 0.025169 0.006322</acceleration>
+          <wrench>0.000852 0.000785 -0.001416 0 -0 0</wrench>
         </link>
         <link name='sensor_link'>
-          <pose>-42.9844 47.8671 1.51164 -1e-06 -0 0.038973</pose>
-          <velocity>7e-06 8e-06 2e-05 -2e-06 -0 3e-06</velocity>
-          <acceleration>0.000366 0.000377 -5.9e-05 3.6e-05 3e-06 0.000202</acceleration>
-          <wrench>3.7e-05 3.8e-05 -6e-06 0 -0 0</wrench>
+          <pose>-42.9827 47.869 1.51164 -1e-06 0 0.039863</pose>
+          <velocity>4e-06 6e-06 2e-05 -1e-06 0 2e-06</velocity>
+          <acceleration>0.000883 0.000535 -0.001258 0.00037 3.6e-05 0.000341</acceleration>
+          <wrench>8.8e-05 5.4e-05 -0.000126 0 -0 0</wrench>
         </link>
       </model>
       <model name='ra_outer_537'>
@@ -30974,16 +30934,6 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='traffic_sign_4'>
-        <pose>22.5 30 1.5 0 0 -1.57</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>22.5 30 1.5 0 0 -1.57</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='xwalk_573'>
         <pose>-21.75 30.75 0.038 0 -0 1.5708</pose>
         <scale>1 1 1</scale>
@@ -31524,10 +31474,914 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
+      <model name='xwalk_yolo_no_light_left_00'>
+        <pose>-41.875 13.8 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-41.875 13.8 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_00_clone'>
+        <pose>-42.6227 13.7738 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-42.6227 13.7738 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_00_clone_0'>
+        <pose>-43.3832 13.7441 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-43.3832 13.7441 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_00_clone_1'>
+        <pose>-44.1916 13.7633 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-44.1916 13.7633 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_00_clone_2'>
+        <pose>-38.1116 13.7529 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-38.1116 13.7529 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_01'>
+        <pose>-41.125 13.8 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-41.125 13.8 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_02'>
+        <pose>-40.375 13.8 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-40.375 13.8 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_03'>
+        <pose>-39.625 13.8 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-39.625 13.8 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='xwalk_yolo_no_light_left_04'>
+        <pose>-38.875 13.8 0.038 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-38.875 13.8 0.038 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_no_entry_east_vertical'>
+        <pose>44.9709 21.94 0 0 -0 -3.14159</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>44.9709 21.94 0 0 -0 -3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_no_left_middle_intersection'>
+        <pose>-13.6008 43.603 0 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-13.6008 43.603 0 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_no_right_west_middle'>
+        <pose>-36.6758 20.9339 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-36.6758 20.9339 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_pedestrian_crossing_no_light'>
+        <pose>-45.028 16.9781 0 0 -0 3.12687</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-45.028 16.9781 0 0 -0 3.12687</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_roadworks_south_entry'>
+        <pose>23.5297 -29.6441 0 0 0 -1.49233</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>23.5297 -29.6441 0 0 0 -1.49233</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_stop_middle_intersection'>
+        <pose>22.7982 52.5041 0 0 -0 1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>22.7982 52.5041 0 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='yolo_traffic_sign_warning_light_top_road'>
+        <pose>-2.67801 22.4576 -0 0 0 -1.5708</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-2.67801 22.4576 -0 0 0 -1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
       <light name='sun'>
         <pose>0 0 1000 0 -0 0</pose>
       </light>
     </state>
+    <model name='xwalk_yolo_no_light_left_00'>
+      <static>1</static>
+      <pose>-41.875 13.8 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_01'>
+      <static>1</static>
+      <pose>-41.125 13.8 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_02'>
+      <static>1</static>
+      <pose>-40.375 13.8 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_03'>
+      <static>1</static>
+      <pose>-39.625 13.8 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_04'>
+      <static>1</static>
+      <pose>-38.875 13.8 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_warning_light_top_road'>
+      <static>1</static>
+      <pose>-22.2 47.2 0 0 -0 -1.5708</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.045 1.15</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.045 1.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.006 1.15</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/WarningTrafficLight</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_pedestrian_crossing_no_light'>
+      <static>1</static>
+      <pose>-38.9 13.8 0 0 -0 -1.5708</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.045 1.15</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.045 1.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.006 1.15</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/WarningPedestrian</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_roadworks_south_entry'>
+      <static>1</static>
+      <pose>18.9 -31.9 0 0 -0 1.5708</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.045 1.15</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.045 1.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.275 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.15 0.006 1.15</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/WarningRoadworks</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_no_entry_east_vertical'>
+      <static>1</static>
+      <pose>38.9 24 0 0 -0 -3.14159</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.045 1.05</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.045 1.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.006 1.05</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/NoEntry</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_stop_middle_intersection'>
+      <static>1</static>
+      <pose>18.9 47.2 0 0 -0 1.5708</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.24 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.08 0.045 1.08</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.24 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.08 0.045 1.08</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.24 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.08 0.006 1.08</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/StopDur</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_no_left_middle_intersection'>
+      <static>1</static>
+      <pose>-18.9 47.2 0 0 -0 1.5708</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.045 1.05</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.045 1.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.006 1.05</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/NoLeftTurn</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='yolo_traffic_sign_no_right_west_middle'>
+      <static>1</static>
+      <pose>-38.9 24 0 0 -0 0</pose>
+      <link name='link'>
+        <collision name='pole_collision'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='pole_visual'>
+          <pose>0 0 1.35 0 -0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.045</radius>
+              <length>2.7</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.45 1</ambient>
+            <diffuse>0.55 0.55 0.55 1</diffuse>
+          </material>
+        </visual>
+        <collision name='panel_collision'>
+          <pose>0 0 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.045 1.05</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='panel_back_visual'>
+          <pose>0 0 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.045 1.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.42 0.42 0.42 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+        <visual name='panel_front_visual'>
+          <pose>0 -0.026 3.225 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>1.05 0.006 1.05</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/scripts</uri>
+              <uri>file:///home/ranim/autoCar_ws/models/traffic_sign_assets/materials/textures</uri>
+              <name>TrafficSigns/NoRightTurn</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
     <model name='traffic_sign_2'>
       <static>1</static>
       <pose>37.5 -45 1.5 0 -0 3.14</pose>
@@ -31640,83 +32494,6 @@
           <material>
             <ambient>0 0 1 1</ambient>
             <diffuse>0 0 1 1</diffuse>
-          </material>
-        </visual>
-        <collision name='pole_col'>
-          <pose>0 0 -0.75 0 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.05</radius>
-              <length>1.5</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='pole'>
-          <pose>0 0 -0.75 0 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>0.05</radius>
-              <length>1.5</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0.5 0.5 0.5 1</ambient>
-            <diffuse>0.5 0.5 0.5 1</diffuse>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-    </model>
-    <model name='traffic_sign_4'>
-      <static>1</static>
-      <pose>22.5 30 1.5 0 0 -1.57</pose>
-      <link name='link'>
-        <collision name='collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.3</radius>
-              <length>0.05</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.3</radius>
-              <length>0.05</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0 1 0 1</ambient>
-            <diffuse>0 1 0 1</diffuse>
           </material>
         </visual>
         <collision name='pole_col'>
@@ -31881,135 +32658,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='bin_4'>
-      <static>1</static>
-      <pose>18 33 0.5 0 -0 0</pose>
-      <link name='link'>
-        <collision name='collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.3</radius>
-              <length>1</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.3</radius>
-              <length>1</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0.2 0.2 0.2 1</ambient>
-            <diffuse>0.3 0.3 0.3 1</diffuse>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-    </model>
-    <model name='pole_1'>
-      <static>1</static>
-      <pose>-45 48 2.5 0 -0 0</pose>
-      <link name='link'>
-        <collision name='collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.1</radius>
-              <length>5</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.1</radius>
-              <length>5</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0.3 0.3 0.3 1</ambient>
-            <diffuse>0.4 0.4 0.4 1</diffuse>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-    </model>
     <model name='pole_2'>
       <static>1</static>
       <pose>45 -48 2.5 0 -0 0</pose>
-      <link name='link'>
-        <collision name='collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.1</radius>
-              <length>5</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.1</radius>
-              <length>5</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0.3 0.3 0.3 1</ambient>
-            <diffuse>0.4 0.4 0.4 1</diffuse>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-    </model>
-    <model name='pole_3'>
-      <static>1</static>
-      <pose>0 52.5 2.5 0 -0 0</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
@@ -32794,48 +33445,6 @@
           <material>
             <ambient>0.5 0.5 0.5 1</ambient>
             <diffuse>0.5 0.5 0.5 1</diffuse>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-    </model>
-    <model name='pole_5'>
-      <static>1</static>
-      <pose>-52.5 45 2.5 0 -0 0</pose>
-      <link name='link'>
-        <collision name='collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.1</radius>
-              <length>5</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.1</radius>
-              <length>5</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0.3 0.3 0.3 1</ambient>
-            <diffuse>0.4 0.4 0.4 1</diffuse>
           </material>
         </visual>
         <self_collide>0</self_collide>
@@ -40087,6 +40696,86 @@
           <material>
             <ambient>0.6 0.4 0.2 1</ambient>
             <diffuse>0.6 0.4 0.2 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_00_clone'>
+      <static>1</static>
+      <pose>-42.6227 13.7738 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_00_clone_0'>
+      <static>1</static>
+      <pose>-43.3832 13.7441 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_00_clone_1'>
+      <static>1</static>
+      <pose>-44.1916 13.7633 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='xwalk_yolo_no_light_left_00_clone_2'>
+      <static>1</static>
+      <pose>-38.1116 13.7529 0.038 0 -0 1.5708</pose>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>3 0.375 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
           </material>
         </visual>
         <self_collide>0</self_collide>

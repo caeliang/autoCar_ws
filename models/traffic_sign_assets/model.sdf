@@ -1,0 +1,5 @@
+<sdf version="1.7">
+  <model name="traffic_sign_assets">
+    <static>1</static>
+  </model>
+</sdf>

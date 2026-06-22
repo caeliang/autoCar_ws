@@ -1,0 +1,118 @@
+material TrafficSigns/WarningTrafficLight
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture trafikisiklari-removebg-preview.png
+      }
+    }
+  }
+}
+
+material TrafficSigns/WarningPedestrian
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture yayagecidi-removebg-preview.png
+      }
+    }
+  }
+}
+
+material TrafficSigns/WarningRoadworks
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture yolcalismasi-removebg-preview.png
+      }
+    }
+  }
+}
+
+material TrafficSigns/NoEntry
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture girilmez-removebg-preview.png
+      }
+    }
+  }
+}
+
+material TrafficSigns/StopDur
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture dur-removebg-preview.png
+      }
+    }
+  }
+}
+
+material TrafficSigns/NoLeftTurn
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture sola.png
+      }
+    }
+  }
+}
+
+material TrafficSigns/NoRightTurn
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      scene_blend alpha_blend
+      depth_write on
+      texture_unit
+      {
+        texture saga.png
+      }
+    }
+  }
+}
